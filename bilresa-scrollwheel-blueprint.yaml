@@ -1,0 +1,271 @@
+blueprint:
+  name: IKEA Bilresa (Remote with scroll) - Smart Light Control
+  description: |
+    Control your lights with the IKEA Bilresa(Remote with scroll) via Matter.
+    
+    **Features:**
+    - 3 independent groups (9 buttons total)
+    - Left/Right buttons: dim up/down
+    - Middle button: toggle on/off
+    - Middle button long press: cycle color temperature (warm → neutral → cool)
+    
+    **Button Layout:**
+    - Buttons 1-3: Group 1
+    - Buttons 4-6: Group 2  
+    - Buttons 7-9: Group 3
+    
+    Select corresponding button ID (1-9) for each button input.
+    Button 1 = button 1 for correct remote, button 2 = button 2, etc.
+
+
+    Group 1 Light: The first light/output you want to control with first group of buttons. Scroll, on/off, longhold for changing color temp.
+    And so on.
+
+    Brightness Step for how much each scroll step should change brightness (in percent).
+    Transition Time for smooth brightness changes (in seconds).
+    Color Temperatures (in Kelvin) for warm, neutral and cool white.
+
+    **Setup:** Find your button entities in Developer Tools → States, they look like "event.your_remote_name_button_1" through "button_9"
+    
+  domain: automation
+  
+  input:
+    button_1:
+      name: Button 1
+      selector:
+        entity:
+          filter:
+            - domain: event
+    button_2:
+      name: Button 2
+      selector:
+        entity:
+          filter:
+            - domain: event
+    button_3:
+      name: Button 3
+      selector:
+        entity:
+          filter:
+            - domain: event
+    button_4:
+      name: Button 4
+      selector:
+        entity:
+          filter:
+            - domain: event
+    button_5:
+      name: Button 5
+      selector:
+        entity:
+          filter:
+            - domain: event
+    button_6:
+      name: Button 6
+      selector:
+        entity:
+          filter:
+            - domain: event
+    button_7:
+      name: Button 7
+      selector:
+        entity:
+          filter:
+            - domain: event
+    button_8:
+      name: Button 8
+      selector:
+        entity:
+          filter:
+            - domain: event
+    button_9:
+      name: Button 9
+      selector:
+        entity:
+          filter:
+            - domain: event
+    
+    group1_light:
+      name: Group 1 Light (Buttons 1-3)
+      description: Light(s) controlled by buttons 1-3
+      selector:
+        entity:
+          filter:
+            - domain: light
+    
+    group2_light:
+      name: Group 2 Light (Buttons 4-6)
+      description: Light(s) controlled by buttons 4-6
+      selector:
+        entity:
+          filter:
+            - domain: light
+    
+    group3_light:
+      name: Group 3 Light (Buttons 7-9)
+      description: Light(s) controlled by buttons 7-9
+      selector:
+        entity:
+          filter:
+            - domain: light
+    
+    brightness_step:
+      name: Brightness Step
+      description: Percentage to increase/decrease brightness per button press
+      default: 10
+      selector:
+        number:
+          min: 5
+          max: 25
+          step: 5
+          unit_of_measurement: "%"
+    
+    transition_time:
+      name: Transition Time
+      description: Smooth transition duration for brightness changes
+      default: 1
+      selector:
+        number:
+          min: 0
+          max: 5
+          step: 1
+          unit_of_measurement: "s"
+    
+    temp_warm:
+      name: Warm Color Temperature
+      description: Warm white color temperature in Kelvin
+      default: 2700
+      selector:
+        number:
+          min: 2000
+          max: 3500
+          step: 100
+          unit_of_measurement: "K"
+    
+    temp_neutral:
+      name: Neutral Color Temperature
+      description: Neutral white color temperature in Kelvin
+      default: 4000
+      selector:
+        number:
+          min: 3500
+          max: 5000
+          step: 100
+          unit_of_measurement: "K"
+    
+    temp_cool:
+      name: Cool Color Temperature
+      description: Cool white color temperature in Kelvin
+      default: 6000
+      selector:
+        number:
+          min: 5000
+          max: 7000
+          step: 100
+          unit_of_measurement: "K"
+
+mode: restart
+max_exceeded: silent
+
+trigger:
+  - platform: state
+    entity_id: !input button_1
+    id: btn1
+  - platform: state
+    entity_id: !input button_2
+    id: btn2
+  - platform: state
+    entity_id: !input button_3
+    id: btn3
+  - platform: state
+    entity_id: !input button_4
+    id: btn4
+  - platform: state
+    entity_id: !input button_5
+    id: btn5
+  - platform: state
+    entity_id: !input button_6
+    id: btn6
+  - platform: state
+    entity_id: !input button_7
+    id: btn7
+  - platform: state
+    entity_id: !input button_8
+    id: btn8
+  - platform: state
+    entity_id: !input button_9
+    id: btn9
+
+action:
+  - variables:
+      group1: !input group1_light
+      group2: !input group2_light
+      group3: !input group3_light
+      warm_temp: !input temp_warm
+      neutral_temp: !input temp_neutral
+      cool_temp: !input temp_cool
+      step_pct: !input brightness_step
+      trans_time: !input transition_time
+      target_light: >
+        {% if trigger.id in ['btn1', 'btn2', 'btn3'] %}
+          {{ group1 }}
+        {% elif trigger.id in ['btn4', 'btn5', 'btn6'] %}
+          {{ group2 }}
+        {% else %}
+          {{ group3 }}
+        {% endif %}
+      is_long: "{{ trigger.to_state.attributes.event_type == 'long_press' }}"
+  
+  # Prevent spurious triggers on HA restart, device offline, or attribute changes
+  - condition: template
+    value_template: >
+      {{ trigger.to_state.state not in ['unknown', 'unavailable']
+         and trigger.from_state.state not in ['unknown', 'unavailable']
+         and trigger.to_state.attributes.event_type is defined
+         and trigger.to_state.attributes.event_type != none }}
+  
+  - choose:
+      - conditions:
+          - condition: template
+            value_template: "{{ is_long and trigger.id in ['btn3', 'btn6', 'btn9'] }}"
+        sequence:
+          - action: light.turn_on
+            target:
+              entity_id: "{{ target_light }}"
+            data:
+              color_temp_kelvin: >
+                {% set current = state_attr(target_light, 'color_temp_kelvin') | int(warm_temp) %}
+                {% if current < neutral_temp %}
+                  {{ neutral_temp }}
+                {% elif current < cool_temp %}
+                  {{ cool_temp }}
+                {% else %}
+                  {{ warm_temp }}
+                {% endif %}
+      - conditions:
+          - condition: template
+            value_template: "{{ trigger.id in ['btn3', 'btn6', 'btn9'] and not is_long }}"
+        sequence:
+          - action: light.toggle
+            target:
+              entity_id: "{{ target_light }}"
+      - conditions:
+          - condition: template
+            value_template: "{{ trigger.id in ['btn1', 'btn4', 'btn7'] }}"
+        sequence:
+          - action: light.turn_on
+            target:
+              entity_id: "{{ target_light }}"
+            data:
+              brightness_step_pct: "{{ step_pct }}"
+              transition: "{{ trans_time }}"
+      - conditions:
+          - condition: template
+            value_template: "{{ trigger.id in ['btn2', 'btn5', 'btn8'] }}"
+        sequence:
+          - action: light.turn_on
+            target:
+              entity_id: "{{ target_light }}"
+            data:
+              brightness_step_pct: "{{ 0 - step_pct }}"
+              transition: "{{ trans_time }}"
