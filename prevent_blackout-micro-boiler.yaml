@@ -1,0 +1,158 @@
+blueprint:
+  name: Priority Device Power Management - Prevent Blackout
+  description: >
+    Automatically manage two high-power devices to prevent circuit overload.
+    When both devices try to run simultaneously, the priority device (e.g., microwave)
+    takes precedence and the secondary device (e.g., boiler) is turned off.
+    Both devices are turned back on when power consumption is low.
+  domain: automation
+  input:
+    priority_device_power_sensor:
+      name: Priority Device Power Sensor
+      description: Power sensor for the priority device (e.g., microwave)
+      selector:
+        entity:
+          filter:
+            - domain: sensor
+              device_class: power
+    priority_device_switch:
+      name: Priority Device Switch
+      description: Switch entity for the priority device
+      selector:
+        entity:
+          filter:
+            - domain: switch
+    secondary_device_power_sensor:
+      name: Secondary Device Power Sensor
+      description: Power sensor for the secondary device (e.g., boiler)
+      selector:
+        entity:
+          filter:
+            - domain: sensor
+              device_class: power
+    secondary_device_switch:
+      name: Secondary Device Switch
+      description: Switch entity for the secondary device
+      selector:
+        entity:
+          filter:
+            - domain: switch
+    priority_device_threshold:
+      name: Priority Device Active Threshold
+      description: Power threshold (W) above which the priority device is considered active
+      default: 500
+      selector:
+        number:
+          min: 10
+          max: 5000
+          step: 10
+          unit_of_measurement: "W"
+    secondary_device_threshold:
+      name: Secondary Device Active Threshold
+      description: Power threshold (W) above which the secondary device is considered active
+      default: 1500
+      selector:
+        number:
+          min: 10
+          max: 5000
+          step: 10
+          unit_of_measurement: "W"
+    idle_threshold:
+      name: Idle Power Threshold
+      description: Power threshold (W) below which devices are considered idle
+      default: 50
+      selector:
+        number:
+          min: 0
+          max: 500
+          step: 5
+          unit_of_measurement: "W"
+    priority_low_threshold:
+      name: Priority Device Low Threshold
+      description: Power threshold (W) below which priority device is considered not running (when secondary is active)
+      default: 100
+      selector:
+        number:
+          min: 0
+          max: 500
+          step: 10
+          unit_of_measurement: "W"
+    trigger_delay_active:
+      name: Active Trigger Delay
+      description: Time delay before reacting to high power consumption
+      default: 5
+      selector:
+        number:
+          min: 1
+          max: 60
+          step: 1
+          unit_of_measurement: "seconds"
+    trigger_delay_idle:
+      name: Idle Trigger Delay
+      description: Time delay before turning devices back on when idle
+      default: 10
+      selector:
+        number:
+          min: 1
+          max: 120
+          step: 1
+          unit_of_measurement: "seconds"
+
+triggers:
+  - above: !input priority_device_threshold
+    entity_id: !input priority_device_power_sensor
+    for:
+      seconds: !input trigger_delay_active
+    trigger: numeric_state
+  - above: !input secondary_device_threshold
+    entity_id: !input secondary_device_power_sensor
+    for:
+      seconds: !input trigger_delay_active
+    trigger: numeric_state
+  - below: !input idle_threshold
+    entity_id:
+      - !input priority_device_power_sensor
+      - !input secondary_device_power_sensor
+    for:
+      seconds: !input trigger_delay_idle
+    trigger: numeric_state
+
+conditions: []
+
+actions:
+  - choose:
+      - conditions:
+          - above: !input priority_device_threshold
+            condition: numeric_state
+            entity_id: !input priority_device_power_sensor
+          - condition: state
+            entity_id: !input secondary_device_switch
+            state: "on"
+        sequence:
+          - action: switch.turn_off
+            target:
+              entity_id: !input secondary_device_switch
+      - conditions:
+          - above: !input secondary_device_threshold
+            condition: numeric_state
+            entity_id: !input secondary_device_power_sensor
+          - below: !input priority_low_threshold
+            condition: numeric_state
+            entity_id: !input priority_device_power_sensor
+        sequence:
+          - stop: Secondary device is running by itself, do nothing
+    default:
+      - sequence:
+          - below: !input idle_threshold
+            condition: numeric_state
+            entity_id: !input priority_device_power_sensor
+          - below: !input idle_threshold
+            condition: numeric_state
+            entity_id: !input secondary_device_power_sensor
+          - action: switch.turn_on
+            target:
+              entity_id:
+                - !input priority_device_switch
+                - !input secondary_device_switch
+
+mode: single
