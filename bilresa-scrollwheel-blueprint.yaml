@@ -170,7 +170,6 @@ max_exceeded: silent
 trigger:
   - platform: state
     entity_id: !input button_1
-    to:
     not_from:
       - unknown
       - unavailable
@@ -180,7 +179,6 @@ trigger:
     id: btn1
   - platform: state
     entity_id: !input button_2
-    to:
     not_from:
       - unknown
       - unavailable
@@ -190,7 +188,6 @@ trigger:
     id: btn2
   - platform: state
     entity_id: !input button_3
-    to:
     not_from:
       - unknown
       - unavailable
@@ -200,7 +197,6 @@ trigger:
     id: btn3
   - platform: state
     entity_id: !input button_4
-    to:
     not_from:
       - unknown
       - unavailable
@@ -210,7 +206,6 @@ trigger:
     id: btn4
   - platform: state
     entity_id: !input button_5
-    to:
     not_from:
       - unknown
       - unavailable
@@ -220,7 +215,6 @@ trigger:
     id: btn5
   - platform: state
     entity_id: !input button_6
-    to:
     not_from:
       - unknown
       - unavailable
@@ -230,7 +224,6 @@ trigger:
     id: btn6
   - platform: state
     entity_id: !input button_7
-    to:
     not_from:
       - unknown
       - unavailable
@@ -240,7 +233,6 @@ trigger:
     id: btn7
   - platform: state
     entity_id: !input button_8
-    to:
     not_from:
       - unknown
       - unavailable
@@ -250,7 +242,6 @@ trigger:
     id: btn8
   - platform: state
     entity_id: !input button_9
-    to:
     not_from:
       - unknown
       - unavailable
