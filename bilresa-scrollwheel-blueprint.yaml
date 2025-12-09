@@ -270,12 +270,10 @@ action:
         {% endif %}
       is_long: "{{ trigger.to_state.attributes.event_type == 'long_press' }}"
   
-  # Prevent spurious triggers on HA restart, device offline, or attribute changes
+  # Ensure we only proceed if event_type is present (actual button event)
   - condition: template
     value_template: >
-      {{ trigger.to_state.state not in ['unknown', 'unavailable']
-         and trigger.from_state.state not in ['unknown', 'unavailable']
-         and trigger.to_state.attributes.event_type is defined
+      {{ trigger.to_state.attributes.event_type is defined
          and trigger.to_state.attributes.event_type != none }}
   
   - choose:
