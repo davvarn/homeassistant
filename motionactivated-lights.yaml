@@ -772,25 +772,96 @@ variables:
       night
     {% endif %}
 
-  # Determine the brightness and color temp based on mode (using input key names)
-  {% for i in range(1, 6) %}
-  room_{{ i }}_brightness: >
+  # --- ROOM 1 Dynamic Settings ---
+  # The loop structure was replaced by manual entries as loops are not allowed for variable keys in the 'variables' section.
+  room_1_brightness: >
     {% if time_mode == 'morning' %}
-      {{ (vars['room_' ~ i ~ '_morning_brightness'] | float * 2.55) | int }}
+      {{ (room_1_morning_brightness | float * 2.55) | int }}
     {% elif time_mode == 'daytime' %}
-      {{ (vars['room_' ~ i ~ '_daytime_brightness'] | float * 2.55) | int }}
+      {{ (room_1_daytime_brightness | float * 2.55) | int }}
     {% else %}
-      {{ (vars['room_' ~ i ~ '_night_brightness'] | float * 2.55) | int }}
+      {{ (room_1_night_brightness | float * 2.55) | int }}
     {% endif %}
-  room_{{ i }}_color_temp: >
+  room_1_color_temp: >
     {% if time_mode == 'morning' %}
-      {{ vars['room_' ~ i ~ '_morning_temp'] | int }}
+      {{ room_1_morning_temp | int }}
     {% elif time_mode == 'daytime' %}
-      {{ vars['room_' ~ i ~ '_daytime_temp'] | int }}
+      {{ room_1_daytime_temp | int }}
     {% else %}
-      {{ vars['room_' ~ i ~ '_night_temp'] | int }}
+      {{ room_1_night_temp | int }}
     {% endif %}
-  {% endfor %}
+
+  # --- ROOM 2 Dynamic Settings ---
+  room_2_brightness: >
+    {% if time_mode == 'morning' %}
+      {{ (room_2_morning_brightness | float * 2.55) | int }}
+    {% elif time_mode == 'daytime' %}
+      {{ (room_2_daytime_brightness | float * 2.55) | int }}
+    {% else %}
+      {{ (room_2_night_brightness | float * 2.55) | int }}
+    {% endif %}
+  room_2_color_temp: >
+    {% if time_mode == 'morning' %}
+      {{ room_2_morning_temp | int }}
+    {% elif time_mode == 'daytime' %}
+      {{ room_2_daytime_temp | int }}
+    {% else %}
+      {{ room_2_night_temp | int }}
+    {% endif %}
+
+  # --- ROOM 3 Dynamic Settings ---
+  room_3_brightness: >
+    {% if time_mode == 'morning' %}
+      {{ (room_3_morning_brightness | float * 2.55) | int }}
+    {% elif time_mode == 'daytime' %}
+      {{ (room_3_daytime_brightness | float * 2.55) | int }}
+    {% else %}
+      {{ (room_3_night_brightness | float * 2.55) | int }}
+    {% endif %}
+  room_3_color_temp: >
+    {% if time_mode == 'morning' %}
+      {{ room_3_morning_temp | int }}
+    {% elif time_mode == 'daytime' %}
+      {{ room_3_daytime_temp | int }}
+    {% else %}
+      {{ room_3_night_temp | int }}
+    {% endif %}
+
+  # --- ROOM 4 Dynamic Settings ---
+  room_4_brightness: >
+    {% if time_mode == 'morning' %}
+      {{ (room_4_morning_brightness | float * 2.55) | int }}
+    {% elif time_mode == 'daytime' %}
+      {{ (room_4_daytime_brightness | float * 2.55) | int }}
+    {% else %}
+      {{ (room_4_night_brightness | float * 2.55) | int }}
+    {% endif %}
+  room_4_color_temp: >
+    {% if time_mode == 'morning' %}
+      {{ room_4_morning_temp | int }}
+    {% elif time_mode == 'daytime' %}
+      {{ room_4_daytime_temp | int }}
+    {% else %}
+      {{ room_4_night_temp | int }}
+    {% endif %}
+
+  # --- ROOM 5 Dynamic Settings ---
+  room_5_brightness: >
+    {% if time_mode == 'morning' %}
+      {{ (room_5_morning_brightness | float * 2.55) | int }}
+    {% elif time_mode == 'daytime' %}
+      {{ (room_5_daytime_brightness | float * 2.55) | int }}
+    {% else %}
+      {{ (room_5_night_brightness | float * 2.55) | int }}
+    {% endif %}
+  room_5_color_temp: >
+    {% if time_mode == 'morning' %}
+      {{ room_5_morning_temp | int }}
+    {% elif time_mode == 'daytime' %}
+      {{ room_5_daytime_temp | int }}
+    {% else %}
+      {{ room_5_night_temp | int }}
+    {% endif %}
   
 trigger:
   # Triggers for all 5 rooms
