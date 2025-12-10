@@ -949,6 +949,7 @@ trigger:
     for: "{{ room_3_off_delay | int }}"
     id: 'room_3_off'
     
+  # Triggers for Room 4
   - platform: state
     entity_id: !input room_4_motion_sensor
     to: 'on'
@@ -960,6 +961,7 @@ trigger:
     for: "{{ room_4_off_delay | int }}"
     id: 'room_4_off'
     
+  # Triggers for Room 5
   - platform: state
     entity_id: !input room_5_motion_sensor
     to: 'on'
@@ -980,21 +982,21 @@ action:
     - conditions:
         - condition: trigger
           id: 'room_1_on'
-        # FIX: Simplified to raw boolean input check
         - condition: template
-          value: "{{ room_1_enabled }}"
+          # FIXED: Explicitly check the boolean input variable for 'true'
+          value_template: "{{ room_1_enabled }}"
         # Override Check: Skip if manual override is active (if entity is provided)
         - condition: template
-          value: "{{ not is_state(room_1_override_switch, 'on') if room_1_override_switch != '' else true }}"
+          value_template: "{{ not is_state(room_1_override_switch, 'on') if room_1_override_switch != '' else true }}"
         # Lux Check: Only turn on if current lux is below the room's threshold
         - condition: template
-          value: "{{ states(lux_entity) | float(0) < room_1_lux_threshold | float(0) }}"
+          value_template: "{{ states(lux_entity) | float(0) < room_1_lux_threshold | float(0) }}"
       sequence:
         - choose:
           # Choice 1: Night Mode AND Nightlight is configured
           - conditions:
               - condition: template
-                value: "{{ time_mode == 'night' and room_1_night_lights | default({}) != {} }}"
+                value_template: "{{ time_mode == 'night' and room_1_night_lights | default({}) != {} }}"
             sequence:
               # Turn on nightlight with night settings
               - service: light.turn_on
@@ -1011,7 +1013,7 @@ action:
           # Default Choice: Morning/Day Mode OR Night Mode but no Nightlight configured (use primary lights)
           - conditions:
               - condition: template
-                value: true
+                value_template: "{{ true }}"
             sequence:
               # Turn off the dedicated Nightlight (in case it was manually left on)
               - if: "{{ room_1_night_lights | default({}) != {} }}"
@@ -1052,21 +1054,21 @@ action:
     - conditions:
         - condition: trigger
           id: 'room_2_on'
-        # FIX: Simplified to raw boolean input check
         - condition: template
-          value: "{{ room_2_enabled }}"
+          # FIXED: Explicitly check the boolean input variable for 'true'
+          value_template: "{{ room_2_enabled }}"
         # Override Check
         - condition: template
-          value: "{{ not is_state(room_2_override_switch, 'on') if room_2_override_switch != '' else true }}"
+          value_template: "{{ not is_state(room_2_override_switch, 'on') if room_2_override_switch != '' else true }}"
         # Lux Check
         - condition: template
-          value: "{{ states(lux_entity) | float(0) < room_2_lux_threshold | float(0) }}"
+          value_template: "{{ states(lux_entity) | float(0) < room_2_lux_threshold | float(0) }}"
       sequence:
         - choose:
           # Choice 1: Night Mode AND Nightlight is configured
           - conditions:
               - condition: template
-                value: "{{ time_mode == 'night' and room_2_night_lights | default({}) != {} }}"
+                value_template: "{{ time_mode == 'night' and room_2_night_lights | default({}) != {} }}"
             sequence:
               # Turn on nightlight with night settings
               - service: light.turn_on
@@ -1083,7 +1085,7 @@ action:
           # Default Choice: Morning/Day Mode OR Night Mode but no Nightlight configured (use primary lights)
           - conditions:
               - condition: template
-                value: true
+                value_template: "{{ true }}"
             sequence:
               # Turn off the dedicated Nightlight
               - if: "{{ room_2_night_lights | default({}) != {} }}"
@@ -1123,21 +1125,21 @@ action:
     - conditions:
         - condition: trigger
           id: 'room_3_on'
-        # FIX: Simplified to raw boolean input check
         - condition: template
-          value: "{{ room_3_enabled }}"
+          # FIXED: Explicitly check the boolean input variable for 'true'
+          value_template: "{{ room_3_enabled }}"
         # Override Check
         - condition: template
-          value: "{{ not is_state(room_3_override_switch, 'on') if room_3_override_switch != '' else true }}"
+          value_template: "{{ not is_state(room_3_override_switch, 'on') if room_3_override_switch != '' else true }}"
         # Lux Check
         - condition: template
-          value: "{{ states(lux_entity) | float(0) < room_3_lux_threshold | float(0) }}"
+          value_template: "{{ states(lux_entity) | float(0) < room_3_lux_threshold | float(0) }}"
       sequence:
         - choose:
           # Choice 1: Night Mode AND Nightlight is configured
           - conditions:
               - condition: template
-                value: "{{ time_mode == 'night' and room_3_night_lights | default({}) != {} }}"
+                value_template: "{{ time_mode == 'night' and room_3_night_lights | default({}) != {} }}"
             sequence:
               # Turn on nightlight with night settings
               - service: light.turn_on
@@ -1154,7 +1156,7 @@ action:
           # Default Choice: Morning/Day Mode OR Night Mode but no Nightlight configured (use primary lights)
           - conditions:
               - condition: template
-                value: true
+                value_template: "{{ true }}"
             sequence:
               # Turn off the dedicated Nightlight
               - if: "{{ room_3_night_lights | default({}) != {} }}"
@@ -1194,21 +1196,21 @@ action:
     - conditions:
         - condition: trigger
           id: 'room_4_on'
-        # FIX: Simplified to raw boolean input check
         - condition: template
-          value: "{{ room_4_enabled }}"
+          # FIXED: Explicitly check the boolean input variable for 'true'
+          value_template: "{{ room_4_enabled }}"
         # Override Check
         - condition: template
-          value: "{{ not is_state(room_4_override_switch, 'on') if room_4_override_switch != '' else true }}"
+          value_template: "{{ not is_state(room_4_override_switch, 'on') if room_4_override_switch != '' else true }}"
         # Lux Check
         - condition: template
-          value: "{{ states(lux_entity) | float(0) < room_4_lux_threshold | float(0) }}"
+          value_template: "{{ states(lux_entity) | float(0) < room_4_lux_threshold | float(0) }}"
       sequence:
         - choose:
           # Choice 1: Night Mode AND Nightlight is configured
           - conditions:
               - condition: template
-                value: "{{ time_mode == 'night' and room_4_night_lights | default({}) != {} }}"
+                value_template: "{{ time_mode == 'night' and room_4_night_lights | default({}) != {} }}"
             sequence:
               # Turn on nightlight with night settings
               - service: light.turn_on
@@ -1225,7 +1227,7 @@ action:
           # Default Choice: Morning/Day Mode OR Night Mode but no Nightlight configured (use primary lights)
           - conditions:
               - condition: template
-                value: true
+                value_template: "{{ true }}"
             sequence:
               # Turn off the dedicated Nightlight
               - if: "{{ room_4_night_lights | default({}) != {} }}"
@@ -1265,27 +1267,28 @@ action:
     - conditions:
         - condition: trigger
           id: 'room_5_on'
-        # FIX: Simplified to raw boolean input check
         - condition: template
-          value: "{{ room_5_enabled }}"
+          # FIXED: Explicitly check the boolean input variable for 'true'
+          value_template: "{{ room_5_enabled }}"
         # Override Check
         - condition: template
-          value: "{{ not is_state(room_5_override_switch, 'on') if room_5_override_switch != '' else true }}"
+          value_template: "{{ not is_state(room_5_override_switch, 'on') if room_5_override_switch != '' else true }}"
         # Lux Check
         - condition: template
-          value: "{{ states(lux_entity) | float(0) < room_5_lux_threshold | float(0) }}"
+          value_template: "{{ states(lux_entity) | float(0) < room_5_lux_threshold | float(0) }}"
       sequence:
         - choose:
           # Choice 1: Night Mode AND Nightlight is configured
           - conditions:
               - condition: template
-                value: "{{ time_mode == 'night' and room_5_night_lights | default({}) != {} }}"
+                value_template: "{{ time_mode == 'night' and room_5_night_lights | default({}) != {} }}"
             sequence:
               # Turn on nightlight with night settings
               - service: light.turn_on
                 data:
                   brightness: "{{ room_5_brightness }}"
                   color_temp: "{{ room_5_color_temp }}"
+                  transition: 1
                 target: !input room_5_night_lights
               # Ensure primary lights are off
               - service: light.turn_off
@@ -1295,7 +1298,7 @@ action:
           # Default Choice: Morning/Day Mode OR Night Mode but no Nightlight configured (use primary lights)
           - conditions:
               - condition: template
-                value: true
+                value_template: "{{ true }}"
             sequence:
               # Turn off the dedicated Nightlight
               - if: "{{ room_5_night_lights | default({}) != {} }}"
