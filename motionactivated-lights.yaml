@@ -773,7 +773,6 @@ variables:
     {% endif %}
 
   # --- ROOM 1 Dynamic Settings ---
-  # The loop structure was replaced by manual entries as loops are not allowed for variable keys in the 'variables' section.
   room_1_brightness: >
     {% if time_mode == 'morning' %}
       {{ (room_1_morning_brightness | float * 2.55) | int }}
@@ -864,57 +863,230 @@ variables:
     {% endif %}
   
 trigger:
-  # Triggers for all 5 rooms
-  {% for i in range(1, 6) %}
-  # Room {{ i }}: Motion Detected
+  # Triggers for Room 1
   - platform: state
-    entity_id: !input room_{{ i }}_motion_sensor
+    entity_id: !input room_1_motion_sensor
     to: 'on'
-    id: 'room_{{ i }}_on'
+    id: 'room_1_on'
     
-  # Room {{ i }}: Motion Cleared (Off Delay)
   - platform: state
-    entity_id: !input room_{{ i }}_motion_sensor
+    entity_id: !input room_1_motion_sensor
     to: 'off'
-    for: "{{ vars['room_' ~ i ~ '_off_delay'] | int }}"
-    id: 'room_{{ i }}_off'
-  {% endfor %}
-  
+    for: "{{ room_1_off_delay | int }}"
+    id: 'room_1_off'
+
+  # Triggers for Room 2
+  - platform: state
+    entity_id: !input room_2_motion_sensor
+    to: 'on'
+    id: 'room_2_on'
+    
+  - platform: state
+    entity_id: !input room_2_motion_sensor
+    to: 'off'
+    for: "{{ room_2_off_delay | int }}"
+    id: 'room_2_off'
+
+  # Triggers for Room 3
+  - platform: state
+    entity_id: !input room_3_motion_sensor
+    to: 'on'
+    id: 'room_3_on'
+    
+  - platform: state
+    entity_id: !input room_3_motion_sensor
+    to: 'off'
+    for: "{{ room_3_off_delay | int }}"
+    id: 'room_3_off'
+    
+  # Triggers for Room 4
+  - platform: state
+    entity_id: !input room_4_motion_sensor
+    to: 'on'
+    id: 'room_4_on'
+    
+  - platform: state
+    entity_id: !input room_4_motion_sensor
+    to: 'off'
+    for: "{{ room_4_off_delay | int }}"
+    id: 'room_4_off'
+    
+  # Triggers for Room 5
+  - platform: state
+    entity_id: !input room_5_motion_sensor
+    to: 'on'
+    id: 'room_5_on'
+    
+  - platform: state
+    entity_id: !input room_5_motion_sensor
+    to: 'off'
+    for: "{{ room_5_off_delay | int }}"
+    id: 'room_5_off'
+
 action:
   - choose:
-      {% for i in range(1, 6) %}
       # ===================================================================================
-      # LIGHTS ON LOGIC (ROOM {{ i }})
+      # LIGHTS ON/OFF LOGIC (ROOM 1)
       # ===================================================================================
+      # Lights ON
     - conditions:
         - condition: trigger
-          id: 'room_{{ i }}_on'
+          id: 'room_1_on'
         - condition: template
-          value: "{{ vars['room_' ~ i ~ '_enabled'] }}"
+          value: "{{ room_1_enabled }}"
         # Override Check: Skip if manual override is active (if entity is provided)
         - condition: template
-          value: "{{ not is_state(vars['room_' ~ i ~ '_override_switch'], 'on') if vars['room_' ~ i ~ '_override_switch'] != '' else true }}"
+          value: "{{ not is_state(room_1_override_switch, 'on') if room_1_override_switch != '' else true }}"
         # Lux Check: Only turn on if current lux is below the room's threshold
         - condition: template
-          value: "{{ states(lux_entity) | float(0) < vars['room_' ~ i ~ '_lux_threshold'] | float(0) }}"
+          value: "{{ states(lux_entity) | float(0) < room_1_lux_threshold | float(0) }}"
       sequence:
         - service: light.turn_on
           data:
-            brightness: "{{ vars['room_' ~ i ~ '_brightness'] }}"
-            color_temp: "{{ vars['room_' ~ i ~ '_color_temp'] }}"
+            brightness: "{{ room_1_brightness }}"
+            color_temp: "{{ room_1_color_temp }}"
             transition: 1
-          target: !input room_{{ i }}_lights
+          target: !input room_1_lights
 
-      # ===================================================================================
-      # LIGHTS OFF LOGIC (ROOM {{ i }})
-      # ===================================================================================
+      # Lights OFF
     - conditions:
         - condition: trigger
-          id: 'room_{{ i }}_off'
+          id: 'room_1_off'
       sequence:
         - service: light.turn_off
           data:
             transition: 2
-          target: !input room_{{ i }}_lights
-      {% endfor %}
+          target: !input room_1_lights
+
+      # ===================================================================================
+      # LIGHTS ON/OFF LOGIC (ROOM 2)
+      # ===================================================================================
+      # Lights ON
+    - conditions:
+        - condition: trigger
+          id: 'room_2_on'
+        - condition: template
+          value: "{{ room_2_enabled }}"
+        # Override Check
+        - condition: template
+          value: "{{ not is_state(room_2_override_switch, 'on') if room_2_override_switch != '' else true }}"
+        # Lux Check
+        - condition: template
+          value: "{{ states(lux_entity) | float(0) < room_2_lux_threshold | float(0) }}"
+      sequence:
+        - service: light.turn_on
+          data:
+            brightness: "{{ room_2_brightness }}"
+            color_temp: "{{ room_2_color_temp }}"
+            transition: 1
+          target: !input room_2_lights
+
+      # Lights OFF
+    - conditions:
+        - condition: trigger
+          id: 'room_2_off'
+      sequence:
+        - service: light.turn_off
+          data:
+            transition: 2
+          target: !input room_2_lights
+
+      # ===================================================================================
+      # LIGHTS ON/OFF LOGIC (ROOM 3)
+      # ===================================================================================
+      # Lights ON
+    - conditions:
+        - condition: trigger
+          id: 'room_3_on'
+        - condition: template
+          value: "{{ room_3_enabled }}"
+        # Override Check
+        - condition: template
+          value: "{{ not is_state(room_3_override_switch, 'on') if room_3_override_switch != '' else true }}"
+        # Lux Check
+        - condition: template
+          value: "{{ states(lux_entity) | float(0) < room_3_lux_threshold | float(0) }}"
+      sequence:
+        - service: light.turn_on
+          data:
+            brightness: "{{ room_3_brightness }}"
+            color_temp: "{{ room_3_color_temp }}"
+            transition: 1
+          target: !input room_3_lights
+
+      # Lights OFF
+    - conditions:
+        - condition: trigger
+          id: 'room_3_off'
+      sequence:
+        - service: light.turn_off
+          data:
+            transition: 2
+          target: !input room_3_lights
+
+      # ===================================================================================
+      # LIGHTS ON/OFF LOGIC (ROOM 4)
+      # ===================================================================================
+      # Lights ON
+    - conditions:
+        - condition: trigger
+          id: 'room_4_on'
+        - condition: template
+          value: "{{ room_4_enabled }}"
+        # Override Check
+        - condition: template
+          value: "{{ not is_state(room_4_override_switch, 'on') if room_4_override_switch != '' else true }}"
+        # Lux Check
+        - condition: template
+          value: "{{ states(lux_entity) | float(0) < room_4_lux_threshold | float(0) }}"
+      sequence:
+        - service: light.turn_on
+          data:
+            brightness: "{{ room_4_brightness }}"
+            color_temp: "{{ room_4_color_temp }}"
+            transition: 1
+          target: !input room_4_lights
+
+      # Lights OFF
+    - conditions:
+        - condition: trigger
+          id: 'room_4_off'
+      sequence:
+        - service: light.turn_off
+          data:
+            transition: 2
+          target: !input room_4_lights
+
+      # ===================================================================================
+      # LIGHTS ON/OFF LOGIC (ROOM 5)
+      # ===================================================================================
+      # Lights ON
+    - conditions:
+        - condition: trigger
+          id: 'room_5_on'
+        - condition: template
+          value: "{{ room_5_enabled }}"
+        # Override Check
+        - condition: template
+          value: "{{ not is_state(room_5_override_switch, 'on') if room_5_override_switch != '' else true }}"
+        # Lux Check
+        - condition: template
+          value: "{{ states(lux_entity) | float(0) < room_5_lux_threshold | float(0) }}"
+      sequence:
+        - service: light.turn_on
+          data:
+            brightness: "{{ room_5_brightness }}"
+            color_temp: "{{ room_5_color_temp }}"
+            transition: 1
+          target: !input room_5_lights
+
+      # Lights OFF
+    - conditions:
+        - condition: trigger
+          id: 'room_5_off'
+      sequence:
+        - service: light.turn_off
+          data:
+            transition: 2
+          target: !input room_5_lights
 mode: restart
