@@ -802,13 +802,6 @@ blueprint:
           unit_of_measurement: K
 
 variables:
-  # Motion sensor entities for each room
-  room_1_motion_sensor: !input room_1_motion_sensor
-  room_2_motion_sensor: !input room_2_motion_sensor
-  room_3_motion_sensor: !input room_3_motion_sensor
-  room_4_motion_sensor: !input room_4_motion_sensor
-  room_5_motion_sensor: !input room_5_motion_sensor
-  
   # Get the current time as a seconds-since-midnight number for comparison
   current_time_seconds: "{{ now().hour * 3600 + now().minute * 60 + now().second }}"
   
@@ -921,53 +914,68 @@ variables:
   
 trigger:
   # Triggers for Room 1
-  - platform: template
-    value_template: "{{ room_1_motion_sensor != '' and is_state(room_1_motion_sensor, 'on') }}"
+  - platform: state
+    entity_id: !input room_1_motion_sensor
+    to: 'on'
     id: 'room_1_on'
     
-  - platform: template
-    value_template: "{{ room_1_motion_sensor != '' and is_state(room_1_motion_sensor, 'off') }}"
-    for: "{{ room_1_off_delay | int }}"
+  - platform: state
+    entity_id: !input room_1_motion_sensor
+    to: 'off'
+    for:
+      seconds: !input room_1_off_delay
     id: 'room_1_off'
 
   # Triggers for Room 2
-  - platform: template
-    value_template: "{{ room_2_motion_sensor != '' and is_state(room_2_motion_sensor, 'on') }}"
+  - platform: state
+    entity_id: !input room_2_motion_sensor
+    to: 'on'
     id: 'room_2_on'
     
-  - platform: template
-    value_template: "{{ room_2_motion_sensor != '' and is_state(room_2_motion_sensor, 'off') }}"
-    for: "{{ room_2_off_delay | int }}"
+  - platform: state
+    entity_id: !input room_2_motion_sensor
+    to: 'off'
+    for:
+      seconds: !input room_2_off_delay
     id: 'room_2_off'
 
   # Triggers for Room 3
-  - platform: template
-    value_template: "{{ room_3_motion_sensor != '' and is_state(room_3_motion_sensor, 'on') }}"
+  - platform: state
+    entity_id: !input room_3_motion_sensor
+    to: 'on'
     id: 'room_3_on'
     
-  - platform: template
-    value_template: "{{ room_3_motion_sensor != '' and is_state(room_3_motion_sensor, 'off') }}"
-    for: "{{ room_3_off_delay | int }}"
+  - platform: state
+    entity_id: !input room_3_motion_sensor
+    to: 'off'
+    for:
+      seconds: !input room_3_off_delay
     id: 'room_3_off'
     
   # Triggers for Room 4
-  - platform: template
-    value_template: "{{ room_4_motion_sensor != '' and is_state(room_4_motion_sensor, 'on') }}"
+  - platform: state
+    entity_id: !input room_4_motion_sensor
+    to: 'on'
     id: 'room_4_on'
     
-  - platform: template
-    value_template: "{{ room_4_motion_sensor != '' and is_state(room_4_motion_sensor, 'off') }}"
-    for: "{{ room_4_off_delay | int }}"
+  - platform: state
+    entity_id: !input room_4_motion_sensor
+    to: 'off'
+    for:
+      seconds: !input room_4_off_delay
     id: 'room_4_off'
     
   # Triggers for Room 5
-  - platform: template
-    value_template: "{{ room_5_motion_sensor != '' and is_state(room_5_motion_sensor, 'on') }}"
+  - platform: state
+    entity_id: !input room_5_motion_sensor
+    to: 'on'
     id: 'room_5_on'
     
-  - platform: template
-    value_template: "{{ room_5_motion_sensor != '' and is_state(room_5_motion_sensor, 'off') }}"
-    for: "{{ room_5_off_delay | int }}"
+  - platform: state
+    entity_id: !input room_5_motion_sensor
+    to: 'off'
+    for:
+      seconds: !input room_5_off_delay
     id: 'room_5_off'
 
 action:
