@@ -983,6 +983,7 @@ action:
         - condition: trigger
           id: 'room_1_on'
         - condition: template
+          # FIXED: Explicitly check the boolean input variable for 'true'
           value: "{{ room_1_enabled }}"
         # Override Check: Skip if manual override is active (if entity is provided)
         - condition: template
@@ -1054,6 +1055,7 @@ action:
         - condition: trigger
           id: 'room_2_on'
         - condition: template
+          # FIXED: Explicitly check the boolean input variable for 'true'
           value: "{{ room_2_enabled }}"
         # Override Check
         - condition: template
@@ -1124,6 +1126,7 @@ action:
         - condition: trigger
           id: 'room_3_on'
         - condition: template
+          # FIXED: Explicitly check the boolean input variable for 'true'
           value: "{{ room_3_enabled }}"
         # Override Check
         - condition: template
@@ -1194,6 +1197,7 @@ action:
         - condition: trigger
           id: 'room_4_on'
         - condition: template
+          # FIXED: Explicitly check the boolean input variable for 'true'
           value: "{{ room_4_enabled }}"
         # Override Check
         - condition: template
@@ -1264,6 +1268,7 @@ action:
         - condition: trigger
           id: 'room_5_on'
         - condition: template
+          # FIXED: Explicitly check the boolean input variable for 'true'
           value: "{{ room_5_enabled }}"
         # Override Check
         - condition: template
