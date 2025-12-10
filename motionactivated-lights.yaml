@@ -919,21 +919,13 @@ variables:
     {% endif %}
   
 trigger:
-  # Trigger on any entity state change (we'll filter in conditions)
-  - platform: event
-    event_type: state_changed
+  - platform: state
+    entity_id: !input room_1_motion_sensor
+    to:
+      - 'on'
+      - 'off'
 
 action:
-  # First, check if trigger was from one of our motion sensors
-  - condition: template
-    value_template: >
-      {{ trigger.event.data.entity_id in [
-        room_1_motion_sensor if room_1_motion_sensor != '' else none,
-        room_2_motion_sensor if room_2_motion_sensor != '' else none,
-        room_3_motion_sensor if room_3_motion_sensor != '' else none,
-        room_4_motion_sensor if room_4_motion_sensor != '' else none,
-        room_5_motion_sensor if room_5_motion_sensor != '' else none
-      ] | reject('none') | list }}
   - choose:
       # ===================================================================================
       # LIGHTS ON/OFF LOGIC (ROOM 1)
@@ -941,7 +933,7 @@ action:
       # Lights ON
     - conditions:
         - condition: template
-          value_template: "{{ trigger.event.data.entity_id == room_1_motion_sensor and trigger.event.data.new_state.state == 'on' }}"
+          value_template: "{{ trigger.entity_id == room_1_motion_sensor and trigger.to_state.state == 'on' }}"
         - condition: template
           value_template: "{{ room_1_enabled }}"
         - condition: template
@@ -989,7 +981,7 @@ action:
       # Lights OFF
     - conditions:
         - condition: template
-          value_template: "{{ trigger.event.data.entity_id == room_1_motion_sensor and trigger.event.data.new_state.state == 'off' }}"
+          value_template: "{{ trigger.entity_id == room_1_motion_sensor and trigger.to_state.state == 'off' }}"
       sequence:
         - delay:
             seconds: "{{ room_1_off_delay }}"
@@ -1012,7 +1004,7 @@ action:
       # Lights ON
     - conditions:
         - condition: template
-          value_template: "{{ trigger.event.data.entity_id == room_2_motion_sensor and trigger.event.data.new_state.state == 'on' }}"
+          value_template: "{{ trigger.entity_id == room_2_motion_sensor and trigger.to_state.state == 'on' }}"
         - condition: template
           value_template: "{{ room_2_enabled }}"
         - condition: template
@@ -1060,7 +1052,7 @@ action:
       # Lights OFF
     - conditions:
         - condition: template
-          value_template: "{{ trigger.event.data.entity_id == room_2_motion_sensor and trigger.event.data.new_state.state == 'off' }}"
+          value_template: "{{ trigger.entity_id == room_2_motion_sensor and trigger.to_state.state == 'off' }}"
       sequence:
         - delay:
             seconds: "{{ room_2_off_delay }}"
@@ -1082,7 +1074,7 @@ action:
       # Lights ON
     - conditions:
         - condition: template
-          value_template: "{{ trigger.event.data.entity_id == room_3_motion_sensor and trigger.event.data.new_state.state == 'on' }}"
+          value_template: "{{ trigger.entity_id == room_3_motion_sensor and trigger.to_state.state == 'on' }}"
         - condition: template
           value_template: "{{ room_3_enabled }}"
         - condition: template
@@ -1130,7 +1122,7 @@ action:
       # Lights OFF
     - conditions:
         - condition: template
-          value_template: "{{ trigger.event.data.entity_id == room_3_motion_sensor and trigger.event.data.new_state.state == 'off' }}"
+          value_template: "{{ trigger.entity_id == room_3_motion_sensor and trigger.to_state.state == 'off' }}"
       sequence:
         - delay:
             seconds: "{{ room_3_off_delay }}"
@@ -1152,7 +1144,7 @@ action:
       # Lights ON
     - conditions:
         - condition: template
-          value_template: "{{ trigger.event.data.entity_id == room_4_motion_sensor and trigger.event.data.new_state.state == 'on' }}"
+          value_template: "{{ trigger.entity_id == room_4_motion_sensor and trigger.to_state.state == 'on' }}"
         - condition: template
           value_template: "{{ room_4_enabled }}"
         - condition: template
@@ -1200,7 +1192,7 @@ action:
       # Lights OFF
     - conditions:
         - condition: template
-          value_template: "{{ trigger.event.data.entity_id == room_4_motion_sensor and trigger.event.data.new_state.state == 'off' }}"
+          value_template: "{{ trigger.entity_id == room_4_motion_sensor and trigger.to_state.state == 'off' }}"
       sequence:
         - delay:
             seconds: "{{ room_4_off_delay }}"
@@ -1222,7 +1214,7 @@ action:
       # Lights ON
     - conditions:
         - condition: template
-          value_template: "{{ trigger.event.data.entity_id == room_5_motion_sensor and trigger.event.data.new_state.state == 'on' }}"
+          value_template: "{{ trigger.entity_id == room_5_motion_sensor and trigger.to_state.state == 'on' }}"
         - condition: template
           value_template: "{{ room_5_enabled }}"
         - condition: template
@@ -1270,7 +1262,7 @@ action:
       # Lights OFF
     - conditions:
         - condition: template
-          value_template: "{{ trigger.event.data.entity_id == room_5_motion_sensor and trigger.event.data.new_state.state == 'off' }}"
+          value_template: "{{ trigger.entity_id == room_5_motion_sensor and trigger.to_state.state == 'off' }}"
       sequence:
         - delay:
             seconds: "{{ room_5_off_delay }}"
