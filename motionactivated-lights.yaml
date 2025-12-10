@@ -1,9 +1,12 @@
 blueprint:
-  name: ✨ Advanced Multi-Room Motion Lighting (v2)
+  name: ✨ Advanced Multi-Room Motion Lighting
   description: Control multiple rooms (up to 5) independently using motion sensors, lux levels, 
     and time-of-day modes. Now supports a dedicated Nightlight for soft illumination 
     during night hours.
   domain: automation
+  author: davvarn
+  homeassistant:
+    min_version: 2022.4.0
   input:
     # ===================================================================================
     # GLOBAL SETTINGS
