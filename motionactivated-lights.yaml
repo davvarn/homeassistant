@@ -1,8 +1,9 @@
 blueprint:
-  name: '✨ Advanced Multi-Room Motion Lighting'
+  name: '✨ Advanced Multi-Room Motion Lighting (v2)'
   description: >
     Control multiple rooms (up to 5) independently using motion sensors, lux levels, 
-    and time-of-day modes. Prevents lights from turning on if the room is already bright enough.
+    and time-of-day modes. Now supports a dedicated Nightlight for soft illumination 
+    during night hours.
   domain: automation
   input:
     # ===================================================================================
@@ -60,15 +61,26 @@ blueprint:
       description: Select the sensor that triggers the light(s).
       selector:
         entity:
-          domain: binary_sensor # Removed device_class: motion to allow occupancy sensors
+          domain: binary_sensor
+      default: '' 
       
     room_1_lights:
-      name: Target Light(s)
-      description: Select one or more light entities to control.
+      name: 💡 Primary Light(s)
+      description: Main lights for Morning and Daytime modes.
       selector:
         target:
           entity:
             domain: light
+      default: {}
+      
+    room_1_night_lights:
+      name: 🌙 Dedicated Night Light(s) (Optional)
+      description: Separate, low-level light used only during Night mode.
+      selector:
+        target:
+          entity:
+            domain: light
+      default: {} # NEW: Optional Night Light Target
       
     room_1_off_delay:
       name: ⏱️ Lights Off Delay (seconds)
@@ -100,9 +112,9 @@ blueprint:
           unit_of_measurement: lux
       
     # Room 1 Brightness Settings (Collapsed by Default)
-    room_1_morning_settings:
-      name: 🌅 Morning Light Settings (After {{ time_morning_start }} & Before {{ time_day_start }})
-      description: Brightness and Color Temperature for morning hours.
+    room_1_morning_group:
+      name: 🌅 Morning Light Settings (06:00 to 08:00)
+      description: Settings for {{ time_morning_start }} to {{ time_day_start }}.
       default: {}
       selector:
         object:
@@ -127,9 +139,9 @@ blueprint:
           mode: slider
           unit_of_measurement: K
       
-    room_1_daytime_settings:
-      name: ☀️ Daytime Light Settings (After {{ time_day_start }} & Before {{ time_night_start }})
-      description: Brightness and Color Temperature for general daytime hours.
+    room_1_daytime_group:
+      name: ☀️ Daytime Light Settings (08:00 to 22:00)
+      description: Settings for {{ time_day_start }} to {{ time_night_start }}.
       default: {}
       selector:
         object:
@@ -154,9 +166,9 @@ blueprint:
           mode: slider
           unit_of_measurement: K
       
-    room_1_night_settings:
-      name: 🌙 Night Light Settings (After {{ time_night_start }} & Before {{ time_morning_start }})
-      description: Low brightness and warm color for late night/sleep hours.
+    room_1_night_group:
+      name: 🌙 Night Light Settings (22:00 to 06:00)
+      description: Settings for {{ time_night_start }} to {{ time_morning_start }}.
       default: {}
       selector:
         object:
@@ -201,15 +213,26 @@ blueprint:
       description: Select the sensor that triggers the light(s).
       selector:
         entity:
-          domain: binary_sensor # Removed device_class: motion
+          domain: binary_sensor
+      default: '' # SET TO OPTIONAL
       
     room_2_lights:
-      name: Target Light(s)
-      description: Select one or more light entities to control.
+      name: 💡 Primary Light(s)
+      description: Main lights for Morning and Daytime modes.
       selector:
         target:
           entity:
             domain: light
+      default: {} # SET TO OPTIONAL
+      
+    room_2_night_lights:
+      name: 🌙 Dedicated Night Light(s) (Optional)
+      description: Separate, low-level light used only during Night mode.
+      selector:
+        target:
+          entity:
+            domain: light
+      default: {} # NEW: Optional Night Light Target
       
     room_2_off_delay:
       name: ⏱️ Lights Off Delay (seconds)
@@ -241,9 +264,9 @@ blueprint:
           unit_of_measurement: lux
       
     # Room 2 Brightness Settings (Collapsed by Default)
-    room_2_morning_settings:
-      name: 🌅 Morning Light Settings (After {{ time_morning_start }} & Before {{ time_day_start }})
-      description: Brightness and Color Temperature for morning hours.
+    room_2_morning_group:
+      name: 🌅 Morning Light Settings (06:00 to 08:00)
+      description: Settings for {{ time_morning_start }} to {{ time_day_start }}.
       default: {}
       selector:
         object:
@@ -268,9 +291,9 @@ blueprint:
           mode: slider
           unit_of_measurement: K
       
-    room_2_daytime_settings:
-      name: ☀️ Daytime Light Settings (After {{ time_day_start }} & Before {{ time_night_start }})
-      description: Brightness and Color Temperature for general daytime hours.
+    room_2_daytime_group:
+      name: ☀️ Daytime Light Settings (08:00 to 22:00)
+      description: Settings for {{ time_day_start }} to {{ time_night_start }}.
       default: {}
       selector:
         object:
@@ -295,9 +318,9 @@ blueprint:
           mode: slider
           unit_of_measurement: K
       
-    room_2_night_settings:
-      name: 🌙 Night Light Settings (After {{ time_night_start }} & Before {{ time_morning_start }})
-      description: Low brightness and warm color for late night/sleep hours.
+    room_2_night_group:
+      name: 🌙 Night Light Settings (22:00 to 06:00)
+      description: Settings for {{ time_night_start }} to {{ time_morning_start }}.
       default: {}
       selector:
         object:
@@ -342,15 +365,26 @@ blueprint:
       description: Select the sensor that triggers the light(s).
       selector:
         entity:
-          domain: binary_sensor # Removed device_class: motion
+          domain: binary_sensor
+      default: '' # SET TO OPTIONAL
       
     room_3_lights:
-      name: Target Light(s)
-      description: Select one or more light entities to control.
+      name: 💡 Primary Light(s)
+      description: Main lights for Morning and Daytime modes.
       selector:
         target:
           entity:
             domain: light
+      default: {} # SET TO OPTIONAL
+      
+    room_3_night_lights:
+      name: 🌙 Dedicated Night Light(s) (Optional)
+      description: Separate, low-level light used only during Night mode.
+      selector:
+        target:
+          entity:
+            domain: light
+      default: {} # NEW: Optional Night Light Target
       
     room_3_off_delay:
       name: ⏱️ Lights Off Delay (seconds)
@@ -382,9 +416,9 @@ blueprint:
           unit_of_measurement: lux
       
     # Room 3 Brightness Settings (Collapsed by Default)
-    room_3_morning_settings:
-      name: 🌅 Morning Light Settings (After {{ time_morning_start }} & Before {{ time_day_start }})
-      description: Brightness and Color Temperature for morning hours.
+    room_3_morning_group:
+      name: 🌅 Morning Light Settings (06:00 to 08:00)
+      description: Settings for {{ time_morning_start }} to {{ time_day_start }}.
       default: {}
       selector:
         object:
@@ -409,9 +443,9 @@ blueprint:
           mode: slider
           unit_of_measurement: K
       
-    room_3_daytime_settings:
-      name: ☀️ Daytime Light Settings (After {{ time_day_start }} & Before {{ time_night_start }})
-      description: Brightness and Color Temperature for general daytime hours.
+    room_3_daytime_group:
+      name: ☀️ Daytime Light Settings (08:00 to 22:00)
+      description: Settings for {{ time_day_start }} to {{ time_night_start }}.
       default: {}
       selector:
         object:
@@ -436,9 +470,9 @@ blueprint:
           mode: slider
           unit_of_measurement: K
       
-    room_3_night_settings:
-      name: 🌙 Night Light Settings (After {{ time_night_start }} & Before {{ time_morning_start }})
-      description: Low brightness and warm color for late night/sleep hours.
+    room_3_night_group:
+      name: 🌙 Night Light Settings (22:00 to 06:00)
+      description: Settings for {{ time_night_start }} to {{ time_morning_start }}.
       default: {}
       selector:
         object:
@@ -483,15 +517,26 @@ blueprint:
       description: Select the sensor that triggers the light(s).
       selector:
         entity:
-          domain: binary_sensor # Removed device_class: motion
+          domain: binary_sensor
+      default: '' # SET TO OPTIONAL
       
     room_4_lights:
-      name: Target Light(s)
-      description: Select one or more light entities to control.
+      name: 💡 Primary Light(s)
+      description: Main lights for Morning and Daytime modes.
       selector:
         target:
           entity:
             domain: light
+      default: {} # SET TO OPTIONAL
+      
+    room_4_night_lights:
+      name: 🌙 Dedicated Night Light(s) (Optional)
+      description: Separate, low-level light used only during Night mode.
+      selector:
+        target:
+          entity:
+            domain: light
+      default: {} # NEW: Optional Night Light Target
       
     room_4_off_delay:
       name: ⏱️ Lights Off Delay (seconds)
@@ -523,9 +568,9 @@ blueprint:
           unit_of_measurement: lux
       
     # Room 4 Brightness Settings (Collapsed by Default)
-    room_4_morning_settings:
-      name: 🌅 Morning Light Settings (After {{ time_morning_start }} & Before {{ time_day_start }})
-      description: Brightness and Color Temperature for morning hours.
+    room_4_morning_group:
+      name: 🌅 Morning Light Settings (06:00 to 08:00)
+      description: Settings for {{ time_morning_start }} to {{ time_day_start }}.
       default: {}
       selector:
         object:
@@ -550,9 +595,9 @@ blueprint:
           mode: slider
           unit_of_measurement: K
       
-    room_4_daytime_settings:
-      name: ☀️ Daytime Light Settings (After {{ time_day_start }} & Before {{ time_night_start }})
-      description: Brightness and Color Temperature for general daytime hours.
+    room_4_daytime_group:
+      name: ☀️ Daytime Light Settings (08:00 to 22:00)
+      description: Settings for {{ time_day_start }} to {{ time_night_start }}.
       default: {}
       selector:
         object:
@@ -577,9 +622,9 @@ blueprint:
           mode: slider
           unit_of_measurement: K
       
-    room_4_night_settings:
-      name: 🌙 Night Light Settings (After {{ time_night_start }} & Before {{ time_morning_start }})
-      description: Low brightness and warm color for late night/sleep hours.
+    room_4_night_group:
+      name: 🌙 Night Light Settings (22:00 to 06:00)
+      description: Settings for {{ time_night_start }} to {{ time_morning_start }}.
       default: {}
       selector:
         object:
@@ -624,15 +669,26 @@ blueprint:
       description: Select the sensor that triggers the light(s).
       selector:
         entity:
-          domain: binary_sensor # Removed device_class: motion
+          domain: binary_sensor
+      default: '' # SET TO OPTIONAL
       
     room_5_lights:
-      name: Target Light(s)
-      description: Select one or more light entities to control.
+      name: 💡 Primary Light(s)
+      description: Main lights for Morning and Daytime modes.
       selector:
         target:
           entity:
             domain: light
+      default: {} # SET TO OPTIONAL
+      
+    room_5_night_lights:
+      name: 🌙 Dedicated Night Light(s) (Optional)
+      description: Separate, low-level light used only during Night mode.
+      selector:
+        target:
+          entity:
+            domain: light
+      default: {} # NEW: Optional Night Light Target
       
     room_5_off_delay:
       name: ⏱️ Lights Off Delay (seconds)
@@ -664,9 +720,9 @@ blueprint:
           unit_of_measurement: lux
       
     # Room 5 Brightness Settings (Collapsed by Default)
-    room_5_morning_settings:
-      name: 🌅 Morning Light Settings (After {{ time_morning_start }} & Before {{ time_day_start }})
-      description: Brightness and Color Temperature for morning hours.
+    room_5_morning_group:
+      name: 🌅 Morning Light Settings (06:00 to 08:00)
+      description: Settings for {{ time_morning_start }} to {{ time_day_start }}.
       default: {}
       selector:
         object:
@@ -691,9 +747,9 @@ blueprint:
           mode: slider
           unit_of_measurement: K
       
-    room_5_daytime_settings:
-      name: ☀️ Daytime Light Settings (After {{ time_day_start }} & Before {{ time_night_start }})
-      description: Brightness and Color Temperature for general daytime hours.
+    room_5_daytime_group:
+      name: ☀️ Daytime Light Settings (08:00 to 22:00)
+      description: Settings for {{ time_day_start }} to {{ time_night_start }}.
       default: {}
       selector:
         object:
@@ -718,9 +774,9 @@ blueprint:
           mode: slider
           unit_of_measurement: K
       
-    room_5_night_settings:
-      name: 🌙 Night Light Settings (After {{ time_night_start }} & Before {{ time_morning_start }})
-      description: Low brightness and warm color for late night/sleep hours.
+    room_5_night_group:
+      name: 🌙 Night Light Settings (22:00 to 06:00)
+      description: Settings for {{ time_night_start }} to {{ time_morning_start }}.
       default: {}
       selector:
         object:
@@ -750,7 +806,6 @@ variables:
   current_time_seconds: "{{ now().hour * 3600 + now().minute * 60 + now().second }}"
   
   # Convert user-defined time inputs (which are strings "HH:MM:SS" from the selector) to seconds since midnight
-  # Note: The input keys (time_morning_start, etc.) are available as variables in the template.
   morning_start_seconds: "{{ (time_morning_start | default('06:00:00', true)).split(':')[0] | int * 3600 + (time_morning_start | default('06:00:00', true)).split(':')[1] | int * 60 }}"
   day_start_seconds: "{{ (time_day_start | default('08:00:00', true)).split(':')[0] | int * 3600 + (time_day_start | default('08:00:00', true)).split(':')[1] | int * 60 }}"
   night_start_seconds: "{{ (time_night_start | default('22:00:00', true)).split(':')[0] | int * 3600 + (time_night_start | default('22:00:00', true)).split(':')[1] | int * 60 }}"
@@ -936,12 +991,42 @@ action:
         - condition: template
           value: "{{ states(lux_entity) | float(0) < room_1_lux_threshold | float(0) }}"
       sequence:
-        - service: light.turn_on
-          data:
-            brightness: "{{ room_1_brightness }}"
-            color_temp: "{{ room_1_color_temp }}"
-            transition: 1
-          target: !input room_1_lights
+        - choose:
+          # Choice 1: Night Mode AND Nightlight is configured
+          - conditions:
+              - condition: template
+                value: "{{ time_mode == 'night' and room_1_night_lights | default({}) != {} }}"
+            sequence:
+              # Turn on nightlight with night settings
+              - service: light.turn_on
+                data:
+                  brightness: "{{ room_1_brightness }}"
+                  color_temp: "{{ room_1_color_temp }}"
+                  transition: 1
+                target: !input room_1_night_lights
+              # Ensure primary lights are off (in case they were manually left on)
+              - service: light.turn_off
+                target: !input room_1_lights
+                data: {transition: 1}
+
+          # Default Choice: Morning/Day Mode OR Night Mode but no Nightlight configured (use primary lights)
+          - conditions:
+              - condition: template
+                value: true
+            sequence:
+              # Turn off the dedicated Nightlight (in case it was manually left on)
+              - if: "{{ room_1_night_lights | default({}) != {} }}"
+                then:
+                  - service: light.turn_off
+                    target: !input room_1_night_lights
+                    data: {transition: 1}
+              # Turn on primary lights with current time mode settings
+              - service: light.turn_on
+                data:
+                  brightness: "{{ room_1_brightness }}"
+                  color_temp: "{{ room_1_color_temp }}"
+                  transition: 1
+                target: !input room_1_lights
 
       # Lights OFF
     - conditions:
@@ -952,6 +1037,14 @@ action:
           data:
             transition: 2
           target: !input room_1_lights
+          
+        - if: "{{ room_1_night_lights | default({}) != {} }}"
+          then:
+            - service: light.turn_off
+              data:
+                transition: 2
+              target: !input room_1_night_lights
+
 
       # ===================================================================================
       # LIGHTS ON/OFF LOGIC (ROOM 2)
@@ -969,12 +1062,42 @@ action:
         - condition: template
           value: "{{ states(lux_entity) | float(0) < room_2_lux_threshold | float(0) }}"
       sequence:
-        - service: light.turn_on
-          data:
-            brightness: "{{ room_2_brightness }}"
-            color_temp: "{{ room_2_color_temp }}"
-            transition: 1
-          target: !input room_2_lights
+        - choose:
+          # Choice 1: Night Mode AND Nightlight is configured
+          - conditions:
+              - condition: template
+                value: "{{ time_mode == 'night' and room_2_night_lights | default({}) != {} }}"
+            sequence:
+              # Turn on nightlight with night settings
+              - service: light.turn_on
+                data:
+                  brightness: "{{ room_2_brightness }}"
+                  color_temp: "{{ room_2_color_temp }}"
+                  transition: 1
+                target: !input room_2_night_lights
+              # Ensure primary lights are off
+              - service: light.turn_off
+                target: !input room_2_lights
+                data: {transition: 1}
+
+          # Default Choice: Morning/Day Mode OR Night Mode but no Nightlight configured (use primary lights)
+          - conditions:
+              - condition: template
+                value: true
+            sequence:
+              # Turn off the dedicated Nightlight
+              - if: "{{ room_2_night_lights | default({}) != {} }}"
+                then:
+                  - service: light.turn_off
+                    target: !input room_2_night_lights
+                    data: {transition: 1}
+              # Turn on primary lights
+              - service: light.turn_on
+                data:
+                  brightness: "{{ room_2_brightness }}"
+                  color_temp: "{{ room_2_color_temp }}"
+                  transition: 1
+                target: !input room_2_lights
 
       # Lights OFF
     - conditions:
@@ -985,6 +1108,13 @@ action:
           data:
             transition: 2
           target: !input room_2_lights
+        
+        - if: "{{ room_2_night_lights | default({}) != {} }}"
+          then:
+            - service: light.turn_off
+              data:
+                transition: 2
+              target: !input room_2_night_lights
 
       # ===================================================================================
       # LIGHTS ON/OFF LOGIC (ROOM 3)
@@ -1002,12 +1132,42 @@ action:
         - condition: template
           value: "{{ states(lux_entity) | float(0) < room_3_lux_threshold | float(0) }}"
       sequence:
-        - service: light.turn_on
-          data:
-            brightness: "{{ room_3_brightness }}"
-            color_temp: "{{ room_3_color_temp }}"
-            transition: 1
-          target: !input room_3_lights
+        - choose:
+          # Choice 1: Night Mode AND Nightlight is configured
+          - conditions:
+              - condition: template
+                value: "{{ time_mode == 'night' and room_3_night_lights | default({}) != {} }}"
+            sequence:
+              # Turn on nightlight with night settings
+              - service: light.turn_on
+                data:
+                  brightness: "{{ room_3_brightness }}"
+                  color_temp: "{{ room_3_color_temp }}"
+                  transition: 1
+                target: !input room_3_night_lights
+              # Ensure primary lights are off
+              - service: light.turn_off
+                target: !input room_3_lights
+                data: {transition: 1}
+
+          # Default Choice: Morning/Day Mode OR Night Mode but no Nightlight configured (use primary lights)
+          - conditions:
+              - condition: template
+                value: true
+            sequence:
+              # Turn off the dedicated Nightlight
+              - if: "{{ room_3_night_lights | default({}) != {} }}"
+                then:
+                  - service: light.turn_off
+                    target: !input room_3_night_lights
+                    data: {transition: 1}
+              # Turn on primary lights
+              - service: light.turn_on
+                data:
+                  brightness: "{{ room_3_brightness }}"
+                  color_temp: "{{ room_3_color_temp }}"
+                  transition: 1
+                target: !input room_3_lights
 
       # Lights OFF
     - conditions:
@@ -1018,6 +1178,13 @@ action:
           data:
             transition: 2
           target: !input room_3_lights
+          
+        - if: "{{ room_3_night_lights | default({}) != {} }}"
+          then:
+            - service: light.turn_off
+              data:
+                transition: 2
+              target: !input room_3_night_lights
 
       # ===================================================================================
       # LIGHTS ON/OFF LOGIC (ROOM 4)
@@ -1035,12 +1202,42 @@ action:
         - condition: template
           value: "{{ states(lux_entity) | float(0) < room_4_lux_threshold | float(0) }}"
       sequence:
-        - service: light.turn_on
-          data:
-            brightness: "{{ room_4_brightness }}"
-            color_temp: "{{ room_4_color_temp }}"
-            transition: 1
-          target: !input room_4_lights
+        - choose:
+          # Choice 1: Night Mode AND Nightlight is configured
+          - conditions:
+              - condition: template
+                value: "{{ time_mode == 'night' and room_4_night_lights | default({}) != {} }}"
+            sequence:
+              # Turn on nightlight with night settings
+              - service: light.turn_on
+                data:
+                  brightness: "{{ room_4_brightness }}"
+                  color_temp: "{{ room_4_color_temp }}"
+                  transition: 1
+                target: !input room_4_night_lights
+              # Ensure primary lights are off
+              - service: light.turn_off
+                target: !input room_4_lights
+                data: {transition: 1}
+
+          # Default Choice: Morning/Day Mode OR Night Mode but no Nightlight configured (use primary lights)
+          - conditions:
+              - condition: template
+                value: true
+            sequence:
+              # Turn off the dedicated Nightlight
+              - if: "{{ room_4_night_lights | default({}) != {} }}"
+                then:
+                  - service: light.turn_off
+                    target: !input room_4_night_lights
+                    data: {transition: 1}
+              # Turn on primary lights
+              - service: light.turn_on
+                data:
+                  brightness: "{{ room_4_brightness }}"
+                  color_temp: "{{ room_4_color_temp }}"
+                  transition: 1
+                target: !input room_4_lights
 
       # Lights OFF
     - conditions:
@@ -1052,6 +1249,13 @@ action:
             transition: 2
           target: !input room_4_lights
 
+        - if: "{{ room_4_night_lights | default({}) != {} }}"
+          then:
+            - service: light.turn_off
+              data:
+                transition: 2
+              target: !input room_4_night_lights
+              
       # ===================================================================================
       # LIGHTS ON/OFF LOGIC (ROOM 5)
       # ===================================================================================
@@ -1068,12 +1272,42 @@ action:
         - condition: template
           value: "{{ states(lux_entity) | float(0) < room_5_lux_threshold | float(0) }}"
       sequence:
-        - service: light.turn_on
-          data:
-            brightness: "{{ room_5_brightness }}"
-            color_temp: "{{ room_5_color_temp }}"
-            transition: 1
-          target: !input room_5_lights
+        - choose:
+          # Choice 1: Night Mode AND Nightlight is configured
+          - conditions:
+              - condition: template
+                value: "{{ time_mode == 'night' and room_5_night_lights | default({}) != {} }}"
+            sequence:
+              # Turn on nightlight with night settings
+              - service: light.turn_on
+                data:
+                  brightness: "{{ room_5_brightness }}"
+                  color_temp: "{{ room_5_color_temp }}"
+                  transition: 1
+                target: !input room_5_night_lights
+              # Ensure primary lights are off
+              - service: light.turn_off
+                target: !input room_5_lights
+                data: {transition: 1}
+
+          # Default Choice: Morning/Day Mode OR Night Mode but no Nightlight configured (use primary lights)
+          - conditions:
+              - condition: template
+                value: true
+            sequence:
+              # Turn off the dedicated Nightlight
+              - if: "{{ room_5_night_lights | default({}) != {} }}"
+                then:
+                  - service: light.turn_off
+                    target: !input room_5_night_lights
+                    data: {transition: 1}
+              # Turn on primary lights
+              - service: light.turn_on
+                data:
+                  brightness: "{{ room_5_brightness }}"
+                  color_temp: "{{ room_5_color_temp }}"
+                  transition: 1
+                target: !input room_5_lights
 
       # Lights OFF
     - conditions:
@@ -1084,4 +1318,11 @@ action:
           data:
             transition: 2
           target: !input room_5_lights
+        
+        - if: "{{ room_5_night_lights | default({}) != {} }}"
+          then:
+            - service: light.turn_off
+              data:
+                transition: 2
+              target: !input room_5_night_lights
 mode: restart
