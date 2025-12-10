@@ -60,8 +60,7 @@ blueprint:
       description: Select the sensor that triggers the light(s).
       selector:
         entity:
-          domain: binary_sensor
-          device_class: motion
+          domain: binary_sensor # Removed device_class: motion to allow occupancy sensors
       
     room_1_lights:
       name: Target Light(s)
@@ -202,8 +201,7 @@ blueprint:
       description: Select the sensor that triggers the light(s).
       selector:
         entity:
-          domain: binary_sensor
-          device_class: motion
+          domain: binary_sensor # Removed device_class: motion
       
     room_2_lights:
       name: Target Light(s)
@@ -344,8 +342,7 @@ blueprint:
       description: Select the sensor that triggers the light(s).
       selector:
         entity:
-          domain: binary_sensor
-          device_class: motion
+          domain: binary_sensor # Removed device_class: motion
       
     room_3_lights:
       name: Target Light(s)
@@ -486,8 +483,7 @@ blueprint:
       description: Select the sensor that triggers the light(s).
       selector:
         entity:
-          domain: binary_sensor
-          device_class: motion
+          domain: binary_sensor # Removed device_class: motion
       
     room_4_lights:
       name: Target Light(s)
@@ -628,8 +624,7 @@ blueprint:
       description: Select the sensor that triggers the light(s).
       selector:
         entity:
-          domain: binary_sensor
-          device_class: motion
+          domain: binary_sensor # Removed device_class: motion
       
     room_5_lights:
       name: Target Light(s)
