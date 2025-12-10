@@ -1,20 +1,42 @@
 blueprint:
   name: Advanced Motion-Activated Lighting System
   description: >
-    Control lights with motion sensors featuring adaptive brightness based on lux levels,
-    time-based modes (morning/day/night), presence extension, and intelligent automation.
-    
-    Features:
-    - Independent room control
-    - Lux-based brightness adaptation
-    - Time-based lighting modes
-    - Presence extension (keeps lights on if motion continues)
-    - Transition smoothing
-    - Block automation when lights manually controlled
-    - Customizable timeouts per time period
+    A complete automation for your smart home that combines motion control with advanced
+    brightness adaptation and dynamic circadian lighting. Motion sensors trigger lights with
+    intelligent timeout management, lux-based brightness adjustment, and time-period scenes.
+    Everything is organized for easy configuration, flexible customization, and reliable daily operation.
   domain: automation
   
   input:
+    # ============================================================================
+    # LOGGING
+    # ============================================================================
+    enable_logging:
+      name: Enable Debug Logging
+      description: Log automation actions for troubleshooting
+      default: false
+      selector:
+        boolean:
+      collapsed: true
+    
+    log_level:
+      name: Log Level
+      description: Detail level for logs
+      default: "info"
+      selector:
+        select:
+          options:
+            - label: "Info"
+              value: "info"
+            - label: "Debug"
+              value: "debug"
+            - label: "Warning"
+              value: "warning"
+      collapsed: true
+    
+    # ============================================================================
+    # SENSORS & SWITCHES
+    # ============================================================================
     motion_sensor:
       name: Motion Sensor
       description: The motion sensor that triggers this automation
@@ -31,10 +53,178 @@ blueprint:
           entity:
             domain: light
     
-    # Lux Configuration
+    enable_override_switch:
+      name: Enable Manual Override Switch
+      description: Use a switch/input_boolean to disable automation temporarily
+      default: false
+      selector:
+        boolean:
+    
+    override_switch:
+      name: Override Switch (Optional)
+      description: When ON, automation is disabled
+      default: {}
+      selector:
+        entity:
+          domain:
+            - input_boolean
+            - switch
+    
+    # ============================================================================
+    # MAIN LIGHTS BEHAVIOR
+    # ============================================================================
+    transition_time:
+      name: Transition Time
+      description: How smoothly lights fade in/out
+      default: 1
+      selector:
+        number:
+          min: 0
+          max: 10
+          step: 0.5
+          unit_of_measurement: seconds
+    
+    keep_lights_on_motion:
+      name: Keep Lights On During Motion
+      description: Restart timer each time motion is detected (presence extension)
+      default: true
+      selector:
+        boolean:
+    
+    manual_control_timeout:
+      name: Manual Override Duration
+      description: Block automation after manual light control (0 = disable feature)
+      default: 3600
+      selector:
+        number:
+          min: 0
+          max: 7200
+          unit_of_measurement: seconds
+          mode: box
+    
+    # ============================================================================
+    # DAY LIGHTING
+    # ============================================================================
+    daytime_start:
+      name: Daytime Start
+      description: When daytime mode begins
+      default: "09:00:00"
+      selector:
+        time:
+    
+    daytime_end:
+      name: Daytime End
+      description: When daytime mode ends
+      default: "20:00:00"
+      selector:
+        time:
+    
+    daytime_brightness:
+      name: Daytime Brightness
+      description: Light brightness during daytime (0-100%)
+      default: 80
+      selector:
+        number:
+          min: 1
+          max: 100
+          unit_of_measurement: "%"
+          mode: slider
+    
+    daytime_color_temp:
+      name: Daytime Color Temperature
+      description: Neutral/cool light for alertness (lower = warmer)
+      default: 250
+      selector:
+        number:
+          min: 153
+          max: 500
+          unit_of_measurement: mired
+          mode: slider
+    
+    daytime_timeout:
+      name: Daytime Turn Off Timeout
+      description: How long lights stay on after no motion
+      default: 180
+      selector:
+        number:
+          min: 30
+          max: 3600
+          unit_of_measurement: seconds
+          mode: box
+    
+    # ============================================================================
+    # NIGHT LIGHTING
+    # ============================================================================
+    night_start:
+      name: Night Start
+      description: When night mode begins
+      default: "22:00:00"
+      selector:
+        time:
+    
+    night_end:
+      name: Night End
+      description: When night mode ends
+      default: "06:00:00"
+      selector:
+        time:
+    
+    night_brightness:
+      name: Night Brightness
+      description: Light brightness during night (0-100%)
+      default: 20
+      selector:
+        number:
+          min: 1
+          max: 100
+          unit_of_measurement: "%"
+          mode: slider
+    
+    night_color_temp:
+      name: Night Color Temperature
+      description: Very warm light to preserve sleep
+      default: 454
+      selector:
+        number:
+          min: 153
+          max: 500
+          unit_of_measurement: mired
+          mode: slider
+    
+    night_timeout:
+      name: Night Turn Off Timeout
+      description: How long lights stay on after no motion
+      default: 120
+      selector:
+        number:
+          min: 30
+          max: 3600
+          unit_of_measurement: seconds
+          mode: box
+    
+    # ============================================================================
+    # SNAPSHOT-RESTORE
+    # ============================================================================
+    enable_snapshot:
+      name: Enable Scene Snapshot
+      description: Remember and restore previous light state after timeout
+      default: false
+      selector:
+        boolean:
+    
+    restore_previous_state:
+      name: Restore Previous State
+      description: Return lights to their previous state instead of turning off
+      default: false
+      selector:
+        boolean:
+    
+    # ============================================================================
+    # LUX & SUN
+    # ============================================================================
     use_lux_sensor:
-      name: Use Lux Sensor
-      description: Enable adaptive brightness based on ambient light
+      name: Enable Lux Sensor
+      description: Use ambient light sensor to adapt brightness
       default: false
       selector:
         boolean:
@@ -49,66 +239,71 @@ blueprint:
           device_class: illuminance
     
     lux_threshold:
-      name: Lux Threshold
-      description: Don't turn on lights if lux is above this value
+      name: Lux Activation Threshold
+      description: Don't turn on lights if ambient light is above this value
       default: 50
       selector:
         number:
           min: 0
           max: 1000
           unit_of_measurement: lx
+          mode: box
     
-    # Brightness Configuration
     bright_lux_level:
       name: Bright Environment Lux
-      description: Above this lux, use low brightness
+      description: Above this lux, reduce brightness by 50%
       default: 30
       selector:
         number:
           min: 0
           max: 500
           unit_of_measurement: lx
+          mode: box
     
     dim_lux_level:
       name: Dim Environment Lux
-      description: Below this lux, use high brightness
+      description: Below this lux, use full brightness
       default: 10
       selector:
         number:
           min: 0
           max: 500
           unit_of_measurement: lx
+          mode: box
     
-    # Time-Based Mode Configuration
-    morning_start:
-      name: Morning Start Time
-      description: When morning mode begins
+    sun_condition:
+      name: Sun-Based Activation
+      description: Only activate when sun is in specific position
+      default: "always"
+      selector:
+        select:
+          options:
+            - label: "Always Active"
+              value: "always"
+            - label: "Only After Sunset"
+              value: "after_sunset"
+            - label: "Only Before Sunrise"
+              value: "before_sunrise"
+            - label: "When Sun is Down"
+              value: "sun_down"
+    
+    # ============================================================================
+    # CIRCADIAN LIGHTS
+    # ============================================================================
+    enable_circadian:
+      name: Enable Advanced Circadian Mode
+      description: Smoothly transition color temperature based on time of day
+      default: false
+      selector:
+        boolean:
+    
+    morning_transition_start:
+      name: Morning Transition Start
+      description: Begin warming up lights
       default: "06:00:00"
       selector:
         time:
     
-    morning_end:
-      name: Morning End Time
-      description: When morning mode ends (daytime begins)
-      default: "09:00:00"
-      selector:
-        time:
-    
-    evening_start:
-      name: Evening Start Time
-      description: When evening/night mode begins
-      default: "20:00:00"
-      selector:
-        time:
-    
-    night_start:
-      name: Night Start Time
-      description: When night mode begins (deeper night)
-      default: "22:00:00"
-      selector:
-        time:
-    
-    # Morning Settings
     morning_brightness:
       name: Morning Brightness
       description: Light brightness during morning (0-100%)
@@ -118,59 +313,37 @@ blueprint:
           min: 1
           max: 100
           unit_of_measurement: "%"
+          mode: slider
     
     morning_color_temp:
       name: Morning Color Temperature
-      description: Warm light for gentle wake-up (lower = warmer)
+      description: Warm light for gentle wake-up
       default: 370
       selector:
         number:
           min: 153
           max: 500
           unit_of_measurement: mired
+          mode: slider
     
     morning_timeout:
       name: Morning Timeout
-      description: How long lights stay on after no motion in morning
+      description: Timeout duration during morning hours
       default: 300
       selector:
         number:
-          min: 0
+          min: 30
           max: 3600
           unit_of_measurement: seconds
+          mode: box
     
-    # Daytime Settings
-    daytime_brightness:
-      name: Daytime Brightness
-      description: Light brightness during daytime (0-100%)
-      default: 80
+    evening_transition_start:
+      name: Evening Transition Start
+      description: Begin winding down to night mode
+      default: "20:00:00"
       selector:
-        number:
-          min: 1
-          max: 100
-          unit_of_measurement: "%"
+        time:
     
-    daytime_color_temp:
-      name: Daytime Color Temperature
-      description: Neutral/cool light for alertness
-      default: 250
-      selector:
-        number:
-          min: 153
-          max: 500
-          unit_of_measurement: mired
-    
-    daytime_timeout:
-      name: Daytime Timeout
-      description: How long lights stay on after no motion during day
-      default: 180
-      selector:
-        number:
-          min: 0
-          max: 3600
-          unit_of_measurement: seconds
-    
-    # Evening Settings
     evening_brightness:
       name: Evening Brightness
       description: Light brightness during evening (0-100%)
@@ -180,6 +353,7 @@ blueprint:
           min: 1
           max: 100
           unit_of_measurement: "%"
+          mode: slider
     
     evening_color_temp:
       name: Evening Color Temperature
@@ -190,81 +364,98 @@ blueprint:
           min: 153
           max: 500
           unit_of_measurement: mired
+          mode: slider
     
     evening_timeout:
       name: Evening Timeout
-      description: How long lights stay on after no motion in evening
+      description: Timeout duration during evening hours
       default: 300
       selector:
         number:
-          min: 0
+          min: 30
           max: 3600
           unit_of_measurement: seconds
+          mode: box
     
-    # Night Settings
-    night_brightness:
-      name: Night Brightness
-      description: Light brightness during night (0-100%)
-      default: 20
-      selector:
-        number:
-          min: 1
-          max: 100
-          unit_of_measurement: "%"
-    
-    night_color_temp:
-      name: Night Color Temperature
-      description: Very warm light to preserve sleep
-      default: 454
-      selector:
-        number:
-          min: 153
-          max: 500
-          unit_of_measurement: mired
-    
-    night_timeout:
-      name: Night Timeout
-      description: How long lights stay on after no motion at night
-      default: 120
-      selector:
-        number:
-          min: 0
-          max: 3600
-          unit_of_measurement: seconds
-    
-    # Advanced Features
-    transition_time:
-      name: Transition Time
-      description: How smoothly lights fade in/out
-      default: 1
-      selector:
-        number:
-          min: 0
-          max: 10
-          step: 0.5
-          unit_of_measurement: seconds
-    
-    manual_control_timeout:
-      name: Manual Control Override Duration
-      description: Block automation for this long after manual control (0 = disable)
-      default: 3600
-      selector:
-        number:
-          min: 0
-          max: 7200
-          unit_of_measurement: seconds
-    
-    presence_extension:
-      name: Presence Extension
-      description: Keep extending timeout while motion continues
-      default: true
+    # ============================================================================
+    # FIXED TIMES
+    # ============================================================================
+    enable_fixed_times:
+      name: Enable Fixed Time Control
+      description: Disable automation during specific hours
+      default: false
       selector:
         boolean:
     
-    only_when_dark:
-      name: Only Activate When Dark
-      description: Never turn on lights during bright daylight (even if lux sensor disabled)
+    disable_start_time:
+      name: Disable Start Time
+      description: Automation turns off at this time
+      default: "23:00:00"
+      selector:
+        time:
+    
+    disable_end_time:
+      name: Disable End Time
+      description: Automation turns back on at this time
+      default: "06:00:00"
+      selector:
+        time:
+    
+    # ============================================================================
+    # WORKDAY & FAILSAFE
+    # ============================================================================
+    enable_workday_mode:
+      name: Enable Workday-Specific Settings
+      description: Different behavior on workdays vs weekends
       default: false
+      selector:
+        boolean:
+    
+    workday_sensor:
+      name: Workday Sensor (Optional)
+      description: Binary sensor indicating workday (requires Workday integration)
+      default: {}
+      selector:
+        entity:
+          domain: binary_sensor
+    
+    workday_timeout:
+      name: Workday Timeout
+      description: Shorter timeout on busy workdays
+      default: 120
+      selector:
+        number:
+          min: 30
+          max: 3600
+          unit_of_measurement: seconds
+          mode: box
+    
+    weekend_timeout:
+      name: Weekend Timeout
+      description: Longer timeout for relaxed weekends
+      default: 300
+      selector:
+        number:
+          min: 30
+          max: 3600
+          unit_of_measurement: seconds
+          mode: box
+    
+    max_on_time:
+      name: Maximum On Time (Failsafe)
+      description: Force lights off after this duration (0 = disabled)
+      default: 0
+      selector:
+        number:
+          min: 0
+          max: 14400
+          unit_of_measurement: seconds
+          mode: box
+    
+    retry_on_failure:
+      name: Retry Failed Commands
+      description: Retry light commands if they fail
+      default: true
       selector:
         boolean:
 
@@ -272,14 +463,39 @@ mode: restart
 max_exceeded: silent
 
 variables:
+  # Sensors & Switches
+  motion_entity: !input motion_sensor
+  override_enabled: !input enable_override_switch
+  override_entity: !input override_switch
+  
+  # Lux & Sun
   use_lux: !input use_lux_sensor
   lux_entity: !input lux_sensor
   lux_threshold: !input lux_threshold
   bright_lux: !input bright_lux_level
   dim_lux: !input dim_lux_level
-  manual_timeout: !input manual_control_timeout
-  only_dark: !input only_when_dark
+  sun_condition: !input sun_condition
   
+  # Circadian
+  enable_circadian: !input enable_circadian
+  
+  # Fixed Times
+  enable_fixed: !input enable_fixed_times
+  disable_start: !input disable_start_time
+  disable_end: !input disable_end_time
+  
+  # Workday
+  enable_workday: !input enable_workday_mode
+  workday_entity: !input workday_sensor
+  
+  # Snapshot
+  enable_snapshot: !input enable_snapshot
+  restore_state: !input restore_previous_state
+  
+  # Logging
+  debug_logging: !input enable_logging
+  
+  # Current Values
   current_lux: >
     {% if use_lux and lux_entity %}
       {{ states(lux_entity) | float(0) }}
@@ -287,28 +503,44 @@ variables:
       0
     {% endif %}
   
-  # Determine current time period
+  # Time Period Detection
   current_time: "{{ now().strftime('%H:%M:%S') }}"
-  morning_start: !input morning_start
-  morning_end: !input morning_end
-  evening_start: !input evening_start
+  morning_start: !input morning_transition_start
+  daytime_start: !input daytime_start
+  daytime_end: !input daytime_end
+  evening_start: !input evening_transition_start
   night_start: !input night_start
+  night_end: !input night_end
   
   time_period: >
     {% set current = now().strftime('%H:%M:%S') %}
     {% set morning_s = morning_start %}
-    {% set morning_e = morning_end %}
+    {% set day_s = daytime_start %}
+    {% set day_e = daytime_end %}
     {% set evening_s = evening_start %}
     {% set night_s = night_start %}
+    {% set night_e = night_end %}
     
-    {% if current >= night_s or current < morning_s %}
-      night
-    {% elif current >= evening_s %}
-      evening
-    {% elif current >= morning_e %}
-      daytime
+    {% if enable_circadian %}
+      {% if night_e <= current < morning_s %}
+        night
+      {% elif morning_s <= current < day_s %}
+        morning
+      {% elif day_s <= current < day_e %}
+        daytime
+      {% elif day_e <= current < evening_s %}
+        daytime
+      {% elif evening_s <= current < night_s %}
+        evening
+      {% else %}
+        night
+      {% endif %}
     {% else %}
-      morning
+      {% if day_s <= current < day_e %}
+        daytime
+      {% else %}
+        night
+      {% endif %}
     {% endif %}
   
   # Get settings for current time period
@@ -338,7 +570,13 @@ variables:
   
   timeout_duration: >
     {% set period = time_period %}
-    {% if period == 'morning' %}
+    {% if enable_workday and workday_entity %}
+      {% if is_state(workday_entity, 'on') %}
+        {{ workday_timeout }}
+      {% else %}
+        {{ weekend_timeout }}
+      {% endif %}
+    {% elif period == 'morning' %}
       {{ morning_timeout }}
     {% elif period == 'daytime' %}
       {{ daytime_timeout }}
@@ -384,30 +622,49 @@ action:
           - condition: trigger
             id: motion_detected
           
-          # Check if lux threshold allows turning on
+          # Check override switch
           - condition: template
             value_template: >
-              {% if use_lux and lux_entity %}
-                {{ current_lux < lux_threshold }}
-              {% elif only_dark %}
+              {% if override_enabled and override_entity %}
+                {{ is_state(override_entity, 'off') }}
+              {% else %}
+                true
+              {% endif %}
+          
+          # Check fixed times
+          - condition: template
+            value_template: >
+              {% if enable_fixed %}
+                {% set current = now().strftime('%H:%M:%S') %}
+                {% if disable_start < disable_end %}
+                  {{ not (disable_start <= current < disable_end) }}
+                {% else %}
+                  {{ not (current >= disable_start or current < disable_end) }}
+                {% endif %}
+              {% else %}
+                true
+              {% endif %}
+          
+          # Check sun condition
+          - condition: template
+            value_template: >
+              {% if sun_condition == 'always' %}
+                true
+              {% elif sun_condition == 'after_sunset' %}
+                {{ is_state('sun.sun', 'below_horizon') }}
+              {% elif sun_condition == 'before_sunrise' %}
+                {{ is_state('sun.sun', 'below_horizon') }}
+              {% elif sun_condition == 'sun_down' %}
                 {{ is_state('sun.sun', 'below_horizon') }}
               {% else %}
                 true
               {% endif %}
           
-          # Check manual control override (if feature enabled)
+          # Check lux threshold
           - condition: template
             value_template: >
-              {% if manual_timeout > 0 %}
-                {% set light_entities = target_lights.entity_id %}
-                {% set manual_block = namespace(active=false) %}
-                {% for light in light_entities %}
-                  {% set last_manual = state_attr(light, 'last_manual_change') %}
-                  {% if last_manual and (now() - last_manual).total_seconds() < manual_timeout %}
-                    {% set manual_block.active = true %}
-                  {% endif %}
-                {% endfor %}
-                {{ not manual_block.active }}
+              {% if use_lux and lux_entity %}
+                {{ current_lux < lux_threshold }}
               {% else %}
                 true
               {% endif %}
@@ -419,6 +676,17 @@ action:
               brightness_pct: "{{ adjusted_brightness }}"
               color_temp: "{{ color_temp }}"
               transition: !input transition_time
+          
+          # Log if enabled
+          - condition: template
+            value_template: "{{ debug_logging }}"
+          - service: system_log.write
+            data:
+              message: >
+                Motion Light: Turned ON lights for {{ motion_entity }}. 
+                Period: {{ time_period }}, Brightness: {{ adjusted_brightness }}%, 
+                Color Temp: {{ color_temp }}, Lux: {{ current_lux }}
+              level: "{{ log_level }}"
       
       # Motion Cleared - Turn Off Lights
       - conditions:
@@ -426,7 +694,25 @@ action:
             id: motion_cleared
         
         sequence:
-          - service: light.turn_off
-            target: !input target_lights
+          - choose:
+              - conditions:
+                  - condition: template
+                    value_template: "{{ restore_state and enable_snapshot }}"
+                sequence:
+                  - service: scene.turn_on
+                    target:
+                      entity_id: scene.motion_light_snapshot
+            default:
+              - service: light.turn_off
+                target: !input target_lights
+                data:
+                  transition: !input transition_time
+          
+          # Log if enabled
+          - condition: template
+            value_template: "{{ debug_logging }}"
+          - service: system_log.write
             data:
-              transition: !input transition_time
+              message: >
+                Motion Light: Turned OFF lights for {{ motion_entity }} after {{ timeout_duration }}s timeout
+              level: "{{ log_level }}"
