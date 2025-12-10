@@ -51,7 +51,7 @@ blueprint:
     
     room_1_enabled:
       name: Enable Room 1 Automation
-      default: true
+      default: true # Room 1 is active by default
       selector:
         boolean:
       
@@ -192,7 +192,7 @@ blueprint:
     
     room_2_enabled:
       name: Enable Room 2 Automation
-      default: false
+      default: false # Inactive by default
       selector:
         boolean:
       
@@ -333,7 +333,7 @@ blueprint:
     
     room_3_enabled:
       name: Enable Room 3 Automation
-      default: false
+      default: false # Inactive by default
       selector:
         boolean:
       
@@ -474,7 +474,7 @@ blueprint:
     
     room_4_enabled:
       name: Enable Room 4 Automation
-      default: false
+      default: false # Inactive by default
       selector:
         boolean:
       
@@ -615,7 +615,7 @@ blueprint:
     
     room_5_enabled:
       name: Enable Room 5 Automation
-      default: false
+      default: false # Inactive by default
       selector:
         boolean:
       
