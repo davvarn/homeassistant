@@ -982,9 +982,11 @@ action:
     - conditions:
         - condition: trigger
           id: 'room_1_on'
-        - condition: template
-          # FIXED: Explicitly check the boolean input variable for 'true'
-          value: "{{ room_1_enabled }}"
+        # FIXED: Check if room is NOT disabled. This is the simplest way to check boolean inputs.
+        - condition: not
+          conditions:
+            - condition: template
+              value: "{{ not room_1_enabled }}"
         # Override Check: Skip if manual override is active (if entity is provided)
         - condition: template
           value: "{{ not is_state(room_1_override_switch, 'on') if room_1_override_switch != '' else true }}"
@@ -1054,9 +1056,11 @@ action:
     - conditions:
         - condition: trigger
           id: 'room_2_on'
-        - condition: template
-          # FIXED: Explicitly check the boolean input variable for 'true'
-          value: "{{ room_2_enabled }}"
+        # FIXED: Check if room is NOT disabled.
+        - condition: not
+          conditions:
+            - condition: template
+              value: "{{ not room_2_enabled }}"
         # Override Check
         - condition: template
           value: "{{ not is_state(room_2_override_switch, 'on') if room_2_override_switch != '' else true }}"
@@ -1125,9 +1129,11 @@ action:
     - conditions:
         - condition: trigger
           id: 'room_3_on'
-        - condition: template
-          # FIXED: Explicitly check the boolean input variable for 'true'
-          value: "{{ room_3_enabled }}"
+        # FIXED: Check if room is NOT disabled.
+        - condition: not
+          conditions:
+            - condition: template
+              value: "{{ not room_3_enabled }}"
         # Override Check
         - condition: template
           value: "{{ not is_state(room_3_override_switch, 'on') if room_3_override_switch != '' else true }}"
@@ -1196,9 +1202,11 @@ action:
     - conditions:
         - condition: trigger
           id: 'room_4_on'
-        - condition: template
-          # FIXED: Explicitly check the boolean input variable for 'true'
-          value: "{{ room_4_enabled }}"
+        # FIXED: Check if room is NOT disabled.
+        - condition: not
+          conditions:
+            - condition: template
+              value: "{{ not room_4_enabled }}"
         # Override Check
         - condition: template
           value: "{{ not is_state(room_4_override_switch, 'on') if room_4_override_switch != '' else true }}"
@@ -1267,9 +1275,11 @@ action:
     - conditions:
         - condition: trigger
           id: 'room_5_on'
-        - condition: template
-          # FIXED: Explicitly check the boolean input variable for 'true'
-          value: "{{ room_5_enabled }}"
+        # FIXED: Check if room is NOT disabled.
+        - condition: not
+          conditions:
+            - condition: template
+              value: "{{ not room_5_enabled }}"
         # Override Check
         - condition: template
           value: "{{ not is_state(room_5_override_switch, 'on') if room_5_override_switch != '' else true }}"
