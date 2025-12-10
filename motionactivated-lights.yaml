@@ -802,6 +802,13 @@ blueprint:
           unit_of_measurement: K
 
 variables:
+  # Motion sensor entities for each room
+  room_1_motion_sensor: !input room_1_motion_sensor
+  room_2_motion_sensor: !input room_2_motion_sensor
+  room_3_motion_sensor: !input room_3_motion_sensor
+  room_4_motion_sensor: !input room_4_motion_sensor
+  room_5_motion_sensor: !input room_5_motion_sensor
+  
   # Get the current time as a seconds-since-midnight number for comparison
   current_time_seconds: "{{ now().hour * 3600 + now().minute * 60 + now().second }}"
   
