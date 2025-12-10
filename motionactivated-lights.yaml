@@ -989,8 +989,10 @@ action:
       # Lights OFF
     - conditions:
         - condition: template
-          value_template: "{{ trigger.event.data.entity_id == room_1_motion_sensor and trigger.event.data.new_state.state == 'off' and (as_timestamp(now()) - as_timestamp(trigger.event.data.old_state.last_changed)) >= room_1_off_delay }}"
+          value_template: "{{ trigger.event.data.entity_id == room_1_motion_sensor and trigger.event.data.new_state.state == 'off' }}"
       sequence:
+        - delay:
+            seconds: "{{ room_1_off_delay }}"
         - service: light.turn_off
           data:
             transition: 2
@@ -1058,8 +1060,10 @@ action:
       # Lights OFF
     - conditions:
         - condition: template
-          value_template: "{{ trigger.entity_id == room_2_motion_sensor and trigger.to_state.state == 'off' and (as_timestamp(now()) - as_timestamp(trigger.from_state.last_changed)) >= room_2_off_delay }}"
+          value_template: "{{ trigger.event.data.entity_id == room_2_motion_sensor and trigger.event.data.new_state.state == 'off' }}"
       sequence:
+        - delay:
+            seconds: "{{ room_2_off_delay }}"
         - service: light.turn_off
           data:
             transition: 2
@@ -1126,8 +1130,10 @@ action:
       # Lights OFF
     - conditions:
         - condition: template
-          value_template: "{{ trigger.entity_id == room_3_motion_sensor and trigger.to_state.state == 'off' and (as_timestamp(now()) - as_timestamp(trigger.from_state.last_changed)) >= room_3_off_delay }}"
+          value_template: "{{ trigger.event.data.entity_id == room_3_motion_sensor and trigger.event.data.new_state.state == 'off' }}"
       sequence:
+        - delay:
+            seconds: "{{ room_3_off_delay }}"
         - service: light.turn_off
           data:
             transition: 2
@@ -1194,8 +1200,10 @@ action:
       # Lights OFF
     - conditions:
         - condition: template
-          value_template: "{{ trigger.entity_id == room_4_motion_sensor and trigger.to_state.state == 'off' and (as_timestamp(now()) - as_timestamp(trigger.from_state.last_changed)) >= room_4_off_delay }}"
+          value_template: "{{ trigger.event.data.entity_id == room_4_motion_sensor and trigger.event.data.new_state.state == 'off' }}"
       sequence:
+        - delay:
+            seconds: "{{ room_4_off_delay }}"
         - service: light.turn_off
           data:
             transition: 2
@@ -1262,8 +1270,10 @@ action:
       # Lights OFF
     - conditions:
         - condition: template
-          value_template: "{{ trigger.entity_id == room_5_motion_sensor and trigger.to_state.state == 'off' and (as_timestamp(now()) - as_timestamp(trigger.from_state.last_changed)) >= room_5_off_delay }}"
+          value_template: "{{ trigger.event.data.entity_id == room_5_motion_sensor and trigger.event.data.new_state.state == 'off' }}"
       sequence:
+        - delay:
+            seconds: "{{ room_5_off_delay }}"
         - service: light.turn_off
           data:
             transition: 2
