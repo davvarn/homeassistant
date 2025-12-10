@@ -1,11 +1,10 @@
 blueprint:
-  name: ✨ Advanced Multi-Room Motion Lighting
-  description: 
+  name: '✨ Advanced Multi-Room Motion Lighting'
+  description: >
     Control multiple rooms (up to 5) independently using motion sensors, lux levels, 
     and time-of-day modes. Now supports a dedicated Nightlight for soft illumination 
     during night hours.
   domain: automation
-  author: Davvarn
   input:
     # ===================================================================================
     # GLOBAL SETTINGS
@@ -62,8 +61,7 @@ blueprint:
       description: Select the sensor that triggers the light(s).
       selector:
         entity:
-          domain: binary_sensor
-      default: '' 
+          domain: binary_sensor 
       
     room_1_lights:
       name: 💡 Primary Light(s)
@@ -215,7 +213,6 @@ blueprint:
       selector:
         entity:
           domain: binary_sensor
-      default: '' # SET TO OPTIONAL
       
     room_2_lights:
       name: 💡 Primary Light(s)
@@ -367,7 +364,6 @@ blueprint:
       selector:
         entity:
           domain: binary_sensor
-      default: '' # SET TO OPTIONAL
       
     room_3_lights:
       name: 💡 Primary Light(s)
@@ -519,7 +515,6 @@ blueprint:
       selector:
         entity:
           domain: binary_sensor
-      default: '' # SET TO OPTIONAL
       
     room_4_lights:
       name: 💡 Primary Light(s)
@@ -671,7 +666,6 @@ blueprint:
       selector:
         entity:
           domain: binary_sensor
-      default: '' # SET TO OPTIONAL
       
     room_5_lights:
       name: 💡 Primary Light(s)
