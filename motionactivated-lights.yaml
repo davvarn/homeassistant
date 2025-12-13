@@ -801,12 +801,8 @@ blueprint:
           unit_of_measurement: K
 
 variables:
-  # Motion sensor entity IDs
+  # Motion sensor entity ID
   room_1_motion_sensor: !input room_1_motion_sensor
-  room_2_motion_sensor: !input room_2_motion_sensor
-  room_3_motion_sensor: !input room_3_motion_sensor
-  room_4_motion_sensor: !input room_4_motion_sensor
-  room_5_motion_sensor: !input room_5_motion_sensor
   
   # Get the current time as a seconds-since-midnight number for comparison
   current_time_seconds: "{{ now().hour * 3600 + now().minute * 60 + now().second }}"
@@ -845,103 +841,28 @@ variables:
     {% else %}
       {{ room_1_night_temp | int }}
     {% endif %}
-
-  # --- ROOM 2 Dynamic Settings ---
-  room_2_brightness: >
-    {% if time_mode == 'morning' %}
-      {{ (room_2_morning_brightness | float * 2.55) | int }}
-    {% elif time_mode == 'daytime' %}
-      {{ (room_2_daytime_brightness | float * 2.55) | int }}
-    {% else %}
-      {{ (room_2_night_brightness | float * 2.55) | int }}
-    {% endif %}
-  room_2_color_temp: >
-    {% if time_mode == 'morning' %}
-      {{ room_2_morning_temp | int }}
-    {% elif time_mode == 'daytime' %}
-      {{ room_2_daytime_temp | int }}
-    {% else %}
-      {{ room_2_night_temp | int }}
-    {% endif %}
-
-  # --- ROOM 3 Dynamic Settings ---
-  room_3_brightness: >
-    {% if time_mode == 'morning' %}
-      {{ (room_3_morning_brightness | float * 2.55) | int }}
-    {% elif time_mode == 'daytime' %}
-      {{ (room_3_daytime_brightness | float * 2.55) | int }}
-    {% else %}
-      {{ (room_3_night_brightness | float * 2.55) | int }}
-    {% endif %}
-  room_3_color_temp: >
-    {% if time_mode == 'morning' %}
-      {{ room_3_morning_temp | int }}
-    {% elif time_mode == 'daytime' %}
-      {{ room_3_daytime_temp | int }}
-    {% else %}
-      {{ room_3_night_temp | int }}
-    {% endif %}
-
-  # --- ROOM 4 Dynamic Settings ---
-  room_4_brightness: >
-    {% if time_mode == 'morning' %}
-      {{ (room_4_morning_brightness | float * 2.55) | int }}
-    {% elif time_mode == 'daytime' %}
-      {{ (room_4_daytime_brightness | float * 2.55) | int }}
-    {% else %}
-      {{ (room_4_night_brightness | float * 2.55) | int }}
-    {% endif %}
-  room_4_color_temp: >
-    {% if time_mode == 'morning' %}
-      {{ room_4_morning_temp | int }}
-    {% elif time_mode == 'daytime' %}
-      {{ room_4_daytime_temp | int }}
-    {% else %}
-      {{ room_4_night_temp | int }}
-    {% endif %}
-
-  # --- ROOM 5 Dynamic Settings ---
-  room_5_brightness: >
-    {% if time_mode == 'morning' %}
-      {{ (room_5_morning_brightness | float * 2.55) | int }}
-    {% elif time_mode == 'daytime' %}
-      {{ (room_5_daytime_brightness | float * 2.55) | int }}
-    {% else %}
-      {{ (room_5_night_brightness | float * 2.55) | int }}
-    {% endif %}
-  room_5_color_temp: >
-    {% if time_mode == 'morning' %}
-      {{ room_5_morning_temp | int }}
-    {% elif time_mode == 'daytime' %}
-      {{ room_5_daytime_temp | int }}
-    {% else %}
-      {{ room_5_night_temp | int }}
-    {% endif %}
   
 trigger:
-  # Trigger on any entity state change (we'll filter in conditions)
-  - platform: event
-    event_type: state_changed
+  - platform: state
+    entity_id: !input room_1_motion_sensor
+    from: 'off'
+    to: 'on'
+    id: room_1_motion
+  - platform: state
+    entity_id: !input room_1_motion_sensor
+    from: 'on'
+    to: 'off'
+    id: room_1_no_motion
 
 action:
-  # First, check if trigger was from one of our motion sensors
-  - condition: template
-    value_template: >
-      {{ trigger.event.data.entity_id in [
-        room_1_motion_sensor if room_1_motion_sensor != '' else none,
-        room_2_motion_sensor if room_2_motion_sensor != '' else none,
-        room_3_motion_sensor if room_3_motion_sensor != '' else none,
-        room_4_motion_sensor if room_4_motion_sensor != '' else none,
-        room_5_motion_sensor if room_5_motion_sensor != '' else none
-      ] | reject('none') | list }}
   - choose:
       # ===================================================================================
       # LIGHTS ON/OFF LOGIC (ROOM 1)
       # ===================================================================================
       # Lights ON
     - conditions:
-        - condition: template
-          value_template: "{{ trigger.event.data.entity_id == room_1_motion_sensor and trigger.event.data.new_state.state == 'on' }}"
+        - condition: trigger
+          id: room_1_motion
         - condition: template
           value_template: "{{ room_1_enabled }}"
         - condition: template
@@ -988,9 +909,11 @@ action:
 
       # Lights OFF
     - conditions:
-        - condition: template
-          value_template: "{{ trigger.event.data.entity_id == room_1_motion_sensor and trigger.event.data.new_state.state == 'off' and (as_timestamp(now()) - as_timestamp(trigger.event.data.old_state.last_changed)) >= room_1_off_delay }}"
+        - condition: trigger
+          id: room_1_no_motion
       sequence:
+        - delay:
+            seconds: "{{ room_1_off_delay }}"
         - service: light.turn_off
           data:
             transition: 2
@@ -1002,277 +925,4 @@ action:
               data:
                 transition: 2
               target: !input room_1_night_lights
-
-
-      # ===================================================================================
-      # LIGHTS ON/OFF LOGIC (ROOM 2)
-      # ===================================================================================
-      # Lights ON
-    - conditions:
-        - condition: template
-          value_template: "{{ trigger.event.data.entity_id == room_2_motion_sensor and trigger.event.data.new_state.state == 'on' }}"
-        - condition: template
-          value_template: "{{ room_2_enabled }}"
-        - condition: template
-          value_template: "{{ not is_state(room_2_override_switch, 'on') if room_2_override_switch != '' else true }}"
-        - condition: template
-          value_template: "{{ states(lux_entity) | float(0) < room_2_lux_threshold | float(0) }}"
-      sequence:
-        - choose:
-          # Choice 1: Night Mode AND Nightlight is configured
-          - conditions:
-              - condition: template
-                value_template: "{{ time_mode == 'night' and room_2_night_lights | default({}) != {} }}"
-            sequence:
-              # Turn on nightlight with night settings
-              - service: light.turn_on
-                data:
-                  brightness: "{{ room_2_brightness }}"
-                  color_temp: "{{ room_2_color_temp }}"
-                  transition: 1
-                target: !input room_2_night_lights
-              # Ensure primary lights are off
-              - service: light.turn_off
-                target: !input room_2_lights
-                data: {transition: 1}
-
-          # Default Choice: Morning/Day Mode OR Night Mode but no Nightlight configured (use primary lights)
-          - conditions:
-              - condition: template
-                value_template: "{{ true }}"
-            sequence:
-              # Turn off the dedicated Nightlight
-              - if: "{{ room_2_night_lights | default({}) != {} }}"
-                then:
-                  - service: light.turn_off
-                    target: !input room_2_night_lights
-                    data: {transition: 1}
-              # Turn on primary lights
-              - service: light.turn_on
-                data:
-                  brightness: "{{ room_2_brightness }}"
-                  color_temp: "{{ room_2_color_temp }}"
-                  transition: 1
-                target: !input room_2_lights
-
-      # Lights OFF
-    - conditions:
-        - condition: template
-          value_template: "{{ trigger.entity_id == room_2_motion_sensor and trigger.to_state.state == 'off' and (as_timestamp(now()) - as_timestamp(trigger.from_state.last_changed)) >= room_2_off_delay }}"
-      sequence:
-        - service: light.turn_off
-          data:
-            transition: 2
-          target: !input room_2_lights
-        
-        - if: "{{ room_2_night_lights | default({}) != {} }}"
-          then:
-            - service: light.turn_off
-              data:
-                transition: 2
-              target: !input room_2_night_lights
-
-      # ===================================================================================
-      # LIGHTS ON/OFF LOGIC (ROOM 3)
-      # ===================================================================================
-      # Lights ON
-    - conditions:
-        - condition: template
-          value_template: "{{ trigger.event.data.entity_id == room_3_motion_sensor and trigger.event.data.new_state.state == 'on' }}"
-        - condition: template
-          value_template: "{{ room_3_enabled }}"
-        - condition: template
-          value_template: "{{ not is_state(room_3_override_switch, 'on') if room_3_override_switch != '' else true }}"
-        - condition: template
-          value_template: "{{ states(lux_entity) | float(0) < room_3_lux_threshold | float(0) }}"
-      sequence:
-        - choose:
-          # Choice 1: Night Mode AND Nightlight is configured
-          - conditions:
-              - condition: template
-                value_template: "{{ time_mode == 'night' and room_3_night_lights | default({}) != {} }}"
-            sequence:
-              # Turn on nightlight with night settings
-              - service: light.turn_on
-                data:
-                  brightness: "{{ room_3_brightness }}"
-                  color_temp: "{{ room_3_color_temp }}"
-                  transition: 1
-                target: !input room_3_night_lights
-              # Ensure primary lights are off
-              - service: light.turn_off
-                target: !input room_3_lights
-                data: {transition: 1}
-
-          # Default Choice: Morning/Day Mode OR Night Mode but no Nightlight configured (use primary lights)
-          - conditions:
-              - condition: template
-                value_template: "{{ true }}"
-            sequence:
-              # Turn off the dedicated Nightlight
-              - if: "{{ room_3_night_lights | default({}) != {} }}"
-                then:
-                  - service: light.turn_off
-                    target: !input room_3_night_lights
-                    data: {transition: 1}
-              # Turn on primary lights
-              - service: light.turn_on
-                data:
-                  brightness: "{{ room_3_brightness }}"
-                  color_temp: "{{ room_3_color_temp }}"
-                  transition: 1
-                target: !input room_3_lights
-
-      # Lights OFF
-    - conditions:
-        - condition: template
-          value_template: "{{ trigger.entity_id == room_3_motion_sensor and trigger.to_state.state == 'off' and (as_timestamp(now()) - as_timestamp(trigger.from_state.last_changed)) >= room_3_off_delay }}"
-      sequence:
-        - service: light.turn_off
-          data:
-            transition: 2
-          target: !input room_3_lights
-          
-        - if: "{{ room_3_night_lights | default({}) != {} }}"
-          then:
-            - service: light.turn_off
-              data:
-                transition: 2
-              target: !input room_3_night_lights
-
-      # ===================================================================================
-      # LIGHTS ON/OFF LOGIC (ROOM 4)
-      # ===================================================================================
-      # Lights ON
-    - conditions:
-        - condition: template
-          value_template: "{{ trigger.event.data.entity_id == room_4_motion_sensor and trigger.event.data.new_state.state == 'on' }}"
-        - condition: template
-          value_template: "{{ room_4_enabled }}"
-        - condition: template
-          value_template: "{{ not is_state(room_4_override_switch, 'on') if room_4_override_switch != '' else true }}"
-        - condition: template
-          value_template: "{{ states(lux_entity) | float(0) < room_4_lux_threshold | float(0) }}"
-      sequence:
-        - choose:
-          # Choice 1: Night Mode AND Nightlight is configured
-          - conditions:
-              - condition: template
-                value_template: "{{ time_mode == 'night' and room_4_night_lights | default({}) != {} }}"
-            sequence:
-              # Turn on nightlight with night settings
-              - service: light.turn_on
-                data:
-                  brightness: "{{ room_4_brightness }}"
-                  color_temp: "{{ room_4_color_temp }}"
-                  transition: 1
-                target: !input room_4_night_lights
-              # Ensure primary lights are off
-              - service: light.turn_off
-                target: !input room_4_lights
-                data: {transition: 1}
-
-          # Default Choice: Morning/Day Mode OR Night Mode but no Nightlight configured (use primary lights)
-          - conditions:
-              - condition: template
-                value_template: "{{ true }}"
-            sequence:
-              # Turn off the dedicated Nightlight
-              - if: "{{ room_4_night_lights | default({}) != {} }}"
-                then:
-                  - service: light.turn_off
-                    target: !input room_4_night_lights
-                    data: {transition: 1}
-              # Turn on primary lights
-              - service: light.turn_on
-                data:
-                  brightness: "{{ room_4_brightness }}"
-                  color_temp: "{{ room_4_color_temp }}"
-                  transition: 1
-                target: !input room_4_lights
-
-      # Lights OFF
-    - conditions:
-        - condition: template
-          value_template: "{{ trigger.entity_id == room_4_motion_sensor and trigger.to_state.state == 'off' and (as_timestamp(now()) - as_timestamp(trigger.from_state.last_changed)) >= room_4_off_delay }}"
-      sequence:
-        - service: light.turn_off
-          data:
-            transition: 2
-          target: !input room_4_lights
-
-        - if: "{{ room_4_night_lights | default({}) != {} }}"
-          then:
-            - service: light.turn_off
-              data:
-                transition: 2
-              target: !input room_4_night_lights
-              
-      # ===================================================================================
-      # LIGHTS ON/OFF LOGIC (ROOM 5)
-      # ===================================================================================
-      # Lights ON
-    - conditions:
-        - condition: template
-          value_template: "{{ trigger.event.data.entity_id == room_5_motion_sensor and trigger.event.data.new_state.state == 'on' }}"
-        - condition: template
-          value_template: "{{ room_5_enabled }}"
-        - condition: template
-          value_template: "{{ not is_state(room_5_override_switch, 'on') if room_5_override_switch != '' else true }}"
-        - condition: template
-          value_template: "{{ states(lux_entity) | float(0) < room_5_lux_threshold | float(0) }}"
-      sequence:
-        - choose:
-          # Choice 1: Night Mode AND Nightlight is configured
-          - conditions:
-              - condition: template
-                value_template: "{{ time_mode == 'night' and room_5_night_lights | default({}) != {} }}"
-            sequence:
-              # Turn on nightlight with night settings
-              - service: light.turn_on
-                data:
-                  brightness: "{{ room_5_brightness }}"
-                  color_temp: "{{ room_5_color_temp }}"
-                  transition: 1
-                target: !input room_5_night_lights
-              # Ensure primary lights are off
-              - service: light.turn_off
-                target: !input room_5_lights
-                data: {transition: 1}
-
-          # Default Choice: Morning/Day Mode OR Night Mode but no Nightlight configured (use primary lights)
-          - conditions:
-              - condition: template
-                value_template: "{{ true }}"
-            sequence:
-              # Turn off the dedicated Nightlight
-              - if: "{{ room_5_night_lights | default({}) != {} }}"
-                then:
-                  - service: light.turn_off
-                    target: !input room_5_night_lights
-                    data: {transition: 1}
-              # Turn on primary lights
-              - service: light.turn_on
-                data:
-                  brightness: "{{ room_5_brightness }}"
-                  color_temp: "{{ room_5_color_temp }}"
-                  transition: 1
-                target: !input room_5_lights
-
-      # Lights OFF
-    - conditions:
-        - condition: template
-          value_template: "{{ trigger.entity_id == room_5_motion_sensor and trigger.to_state.state == 'off' and (as_timestamp(now()) - as_timestamp(trigger.from_state.last_changed)) >= room_5_off_delay }}"
-      sequence:
-        - service: light.turn_off
-          data:
-            transition: 2
-          target: !input room_5_lights
-        
-        - if: "{{ room_5_night_lights | default({}) != {} }}"
-          then:
-            - service: light.turn_off
-              data:
-                transition: 2
-              target: !input room_5_night_lights
 mode: restart
