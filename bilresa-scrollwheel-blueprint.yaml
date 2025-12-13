@@ -163,48 +163,6 @@ blueprint:
           max: 7000
           step: 100
           unit_of_measurement: "K"
-    
-    double_press_action_group1:
-      name: Group 1 Double Press Action (Optional)
-      description: Action to perform on double press of middle button (button 3)
-      default: []
-      selector:
-        action: {}
-    
-    triple_press_action_group1:
-      name: Group 1 Triple Press Action (Optional)
-      description: Action to perform on triple press of middle button (button 3)
-      default: []
-      selector:
-        action: {}
-    
-    double_press_action_group2:
-      name: Group 2 Double Press Action (Optional)
-      description: Action to perform on double press of middle button (button 6)
-      default: []
-      selector:
-        action: {}
-    
-    triple_press_action_group2:
-      name: Group 2 Triple Press Action (Optional)
-      description: Action to perform on triple press of middle button (button 6)
-      default: []
-      selector:
-        action: {}
-    
-    double_press_action_group3:
-      name: Group 3 Double Press Action (Optional)
-      description: Action to perform on double press of middle button (button 9)
-      default: []
-      selector:
-        action: {}
-    
-    triple_press_action_group3:
-      name: Group 3 Triple Press Action (Optional)
-      description: Action to perform on triple press of middle button (button 9)
-      default: []
-      selector:
-        action: {}
 
 mode: restart
 max_exceeded: silent
@@ -319,35 +277,6 @@ action:
          and trigger.to_state.attributes.event_type != none }}
   
   - choose:
-      # Double press actions for middle buttons
-      - conditions:
-          - condition: template
-            value_template: "{{ trigger.to_state.attributes.event_type == 'double_press' and trigger.id == 'btn3' }}"
-        sequence: !input double_press_action_group1
-      - conditions:
-          - condition: template
-            value_template: "{{ trigger.to_state.attributes.event_type == 'double_press' and trigger.id == 'btn6' }}"
-        sequence: !input double_press_action_group2
-      - conditions:
-          - condition: template
-            value_template: "{{ trigger.to_state.attributes.event_type == 'double_press' and trigger.id == 'btn9' }}"
-        sequence: !input double_press_action_group3
-      
-      # Triple press actions for middle buttons
-      - conditions:
-          - condition: template
-            value_template: "{{ trigger.to_state.attributes.event_type == 'triple_press' and trigger.id == 'btn3' }}"
-        sequence: !input triple_press_action_group1
-      - conditions:
-          - condition: template
-            value_template: "{{ trigger.to_state.attributes.event_type == 'triple_press' and trigger.id == 'btn6' }}"
-        sequence: !input triple_press_action_group2
-      - conditions:
-          - condition: template
-            value_template: "{{ trigger.to_state.attributes.event_type == 'triple_press' and trigger.id == 'btn9' }}"
-        sequence: !input triple_press_action_group3
-      
-      # Long press for color temperature cycling
       - conditions:
           - condition: template
             value_template: "{{ is_long and trigger.id in ['btn3', 'btn6', 'btn9'] }}"
@@ -365,8 +294,6 @@ action:
                 {% else %}
                   {{ warm_temp }}
                 {% endif %}
-      
-      # Single press toggle (default behavior)
       - conditions:
           - condition: template
             value_template: "{{ trigger.id in ['btn3', 'btn6', 'btn9'] and not is_long }}"
