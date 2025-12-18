@@ -318,11 +318,6 @@ action:
       {{ trigger.to_state.attributes.event_type is defined
          and trigger.to_state.attributes.event_type != none }}
   
-  # Prevent stale events from triggering when device reconnects
-  - condition: template
-    value_template: >
-      {{ (now() - trigger.to_state.last_changed).total_seconds() < 5 }}
-  
   - choose:
       # Double press actions for middle buttons
       - conditions:
