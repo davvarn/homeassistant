@@ -277,9 +277,11 @@ action:
          and trigger.to_state.attributes.event_type != none }}
   
   # Prevent stale events from triggering when device reconnects
+  # Check both last_changed AND the actual event timestamp in the state
   - condition: template
     value_template: >
-      {{ (now() - trigger.to_state.last_changed).total_seconds() < 5 }}
+      {{ (now() - trigger.to_state.last_changed).total_seconds() < 5
+         and (now() - (trigger.to_state.state | as_datetime | as_local)).total_seconds() < 5 }}
   
   - choose:
       # Long press for color temperature cycling
