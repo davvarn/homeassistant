@@ -440,12 +440,10 @@ action:
               entity_id: "{{ target_light }}"
             data:
               color_temp_kelvin: >
-                {% set current = state_attr(target_light, 'color_temp_kelvin') | int(0) %}
-                {% set mid_warm_neutral = (warm_temp + neutral_temp) / 2 %}
-                {% set mid_neutral_cool = (neutral_temp + cool_temp) / 2 %}
-                {% if current == 0 or current <= mid_warm_neutral %}
+                {% set current = state_attr(target_light, 'color_temp_kelvin') | int(warm_temp) %}
+                {% if current < neutral_temp %}
                   {{ neutral_temp }}
-                {% elif current <= mid_neutral_cool %}
+                {% elif current < cool_temp %}
                   {{ cool_temp }}
                 {% else %}
                   {{ warm_temp }}
