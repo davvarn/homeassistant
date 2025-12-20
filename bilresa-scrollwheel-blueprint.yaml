@@ -85,101 +85,6 @@ blueprint:
           filter:
             - domain: event
     
-    control_mode:
-      name: Control Mode
-      description: |
-        **Event Mode**: Uses button events (supports long-press for color temp)
-        **Sensor Mode**: Uses switch position sensors (faster brightness response)
-      default: event
-      selector:
-        select:
-          options:
-            - label: Event Mode (with long-press)
-              value: event
-            - label: Sensor Mode (faster)
-              value: sensor
-    
-    sensor_position_1:
-      name: Switch Position Sensor 1
-      description: Only needed for Sensor Mode
-      default: ""
-      selector:
-        entity:
-          filter:
-            - domain: sensor
-    
-    sensor_position_2:
-      name: Switch Position Sensor 2
-      description: Only needed for Sensor Mode
-      default: ""
-      selector:
-        entity:
-          filter:
-            - domain: sensor
-    
-    sensor_position_3:
-      name: Switch Position Sensor 3
-      description: Only needed for Sensor Mode
-      default: ""
-      selector:
-        entity:
-          filter:
-            - domain: sensor
-    
-    sensor_position_4:
-      name: Switch Position Sensor 4
-      description: Only needed for Sensor Mode
-      default: ""
-      selector:
-        entity:
-          filter:
-            - domain: sensor
-    
-    sensor_position_5:
-      name: Switch Position Sensor 5
-      description: Only needed for Sensor Mode
-      default: ""
-      selector:
-        entity:
-          filter:
-            - domain: sensor
-    
-    sensor_position_6:
-      name: Switch Position Sensor 6
-      description: Only needed for Sensor Mode
-      default: ""
-      selector:
-        entity:
-          filter:
-            - domain: sensor
-    
-    sensor_position_7:
-      name: Switch Position Sensor 7
-      description: Only needed for Sensor Mode
-      default: ""
-      selector:
-        entity:
-          filter:
-            - domain: sensor
-    
-    sensor_position_8:
-      name: Switch Position Sensor 8
-      description: Only needed for Sensor Mode
-      default: ""
-      selector:
-        entity:
-          filter:
-            - domain: sensor
-    
-    sensor_position_9:
-      name: Switch Position Sensor 9
-      description: Only needed for Sensor Mode
-      default: ""
-      selector:
-        entity:
-          filter:
-            - domain: sensor
-    
     group1_light:
       name: Group 1 Light (Buttons 1-3)
       description: Light(s) controlled by buttons 1-3
@@ -263,7 +168,6 @@ mode: restart
 max_exceeded: silent
 
 trigger:
-  # Event-based triggers (for Event Mode)
   - platform: state
     entity_id: !input button_1
     not_from:
@@ -345,44 +249,6 @@ trigger:
       - unknown
       - unavailable
     id: btn9
-  
-  # Sensor-based triggers (for Sensor Mode)
-  - platform: state
-    entity_id: !input sensor_position_1
-    to: "1"
-    id: sensor1
-  - platform: state
-    entity_id: !input sensor_position_2
-    to: "2"
-    id: sensor2
-  - platform: state
-    entity_id: !input sensor_position_3
-    to: "3"
-    id: sensor3
-  - platform: state
-    entity_id: !input sensor_position_4
-    to: "4"
-    id: sensor4
-  - platform: state
-    entity_id: !input sensor_position_5
-    to: "5"
-    id: sensor5
-  - platform: state
-    entity_id: !input sensor_position_6
-    to: "6"
-    id: sensor6
-  - platform: state
-    entity_id: !input sensor_position_7
-    to: "7"
-    id: sensor7
-  - platform: state
-    entity_id: !input sensor_position_8
-    to: "8"
-    id: sensor8
-  - platform: state
-    entity_id: !input sensor_position_9
-    to: "9"
-    id: sensor9
 
 action:
   - variables:
@@ -394,78 +260,62 @@ action:
       cool_temp: !input temp_cool
       step_pct: !input brightness_step
       trans_time: !input transition_time
-      mode: !input control_mode
-      is_sensor_mode: "{{ mode == 'sensor' }}"
-      is_event_mode: "{{ mode == 'event' }}"
-      trigger_type: "{{ trigger.id.split('|')[0] if '|' in trigger.id else trigger.id[:6] if trigger.id.startswith('sensor') else trigger.id[:3] }}"
       target_light: >
-        {% if trigger.id in ['btn1', 'btn2', 'btn3', 'sensor1', 'sensor2', 'sensor3'] %}
+        {% if trigger.id in ['btn1', 'btn2', 'btn3'] %}
           {{ group1 }}
-        {% elif trigger.id in ['btn4', 'btn5', 'btn6', 'sensor4', 'sensor5', 'sensor6'] %}
+        {% elif trigger.id in ['btn4', 'btn5', 'btn6'] %}
           {{ group2 }}
         {% else %}
           {{ group3 }}
         {% endif %}
-      is_long: "{{ trigger.to_state.attributes.event_type == 'long_press' if not is_sensor_mode else false }}"
+      is_long: "{{ trigger.to_state.attributes.event_type == 'long_press' }}"
   
-  # Mode-specific validation
+  # Ensure we only proceed if event_type is present (actual button event)
   - condition: template
     value_template: >
-      {% if is_event_mode %}
-        {{ trigger.id.startswith('btn') and 
-           trigger.to_state.attributes.event_type is defined and 
-           trigger.to_state.attributes.event_type != none }}
-      {% else %}
-        {{ trigger.id.startswith('sensor') }}
-      {% endif %}
+      {{ trigger.to_state.attributes.event_type is defined
+         and trigger.to_state.attributes.event_type != none }}
   
-  # Prevent stale events (event mode only)
+  # Prevent stale events from triggering when device reconnects
+  # Check both last_changed AND the actual event timestamp in the state
   - condition: template
     value_template: >
-      {% if is_event_mode %}
-        {{ (now() - trigger.to_state.last_changed).total_seconds() < 5 and
-           (now() - (trigger.to_state.state | as_datetime | as_local)).total_seconds() < 5 }}
-      {% else %}
-        {{ (now() - trigger.to_state.last_changed).total_seconds() < 2 }}
-      {% endif %}
+      {{ (now() - trigger.to_state.last_changed).total_seconds() < 5
+         and (now() - (trigger.to_state.state | as_datetime | as_local)).total_seconds() < 5 }}
   
   - choose:
-      # Long press for color temperature cycling (Event Mode only)
+      # Long press for color temperature cycling
       - conditions:
           - condition: template
-            value_template: "{{ is_event_mode and is_long and trigger.id in ['btn3', 'btn6', 'btn9'] }}"
+            value_template: "{{ is_long and trigger.id in ['btn3', 'btn6', 'btn9'] }}"
         sequence:
           - action: light.turn_on
             target:
               entity_id: "{{ target_light }}"
             data:
               color_temp_kelvin: >
-                {% set current = state_attr(target_light, 'color_temp_kelvin') | int(warm_temp) %}
-                {% if current < neutral_temp %}
+                {% set current = state_attr(target_light, 'color_temp_kelvin') | int(0) %}
+                {% set mid_warm_neutral = (warm_temp + neutral_temp) / 2 %}
+                {% set mid_neutral_cool = (neutral_temp + cool_temp) / 2 %}
+                {% if current == 0 or current <= mid_warm_neutral %}
                   {{ neutral_temp }}
-                {% elif current < cool_temp %}
+                {% elif current <= mid_neutral_cool %}
                   {{ cool_temp }}
                 {% else %}
                   {{ warm_temp }}
                 {% endif %}
       
-      # Toggle middle button (both modes)
+      # Single press toggle (default behavior)
       - conditions:
           - condition: template
-            value_template: >
-              {{ (is_event_mode and trigger.id in ['btn3', 'btn6', 'btn9'] and not is_long) or
-                 (is_sensor_mode and trigger.id in ['sensor3', 'sensor6', 'sensor9']) }}
+            value_template: "{{ trigger.id in ['btn3', 'btn6', 'btn9'] and not is_long }}"
         sequence:
           - action: light.toggle
             target:
               entity_id: "{{ target_light }}"
-      
-      # Brightness up (left buttons/positions)
       - conditions:
           - condition: template
-            value_template: >
-              {{ (is_event_mode and trigger.id in ['btn1', 'btn4', 'btn7']) or
-                 (is_sensor_mode and trigger.id in ['sensor1', 'sensor4', 'sensor7']) }}
+            value_template: "{{ trigger.id in ['btn1', 'btn4', 'btn7'] }}"
         sequence:
           - action: light.turn_on
             target:
@@ -473,13 +323,9 @@ action:
             data:
               brightness_step_pct: "{{ step_pct }}"
               transition: "{{ trans_time }}"
-      
-      # Brightness down (right buttons/positions)
       - conditions:
           - condition: template
-            value_template: >
-              {{ (is_event_mode and trigger.id in ['btn2', 'btn5', 'btn8']) or
-                 (is_sensor_mode and trigger.id in ['sensor2', 'sensor5', 'sensor8']) }}
+            value_template: "{{ trigger.id in ['btn2', 'btn5', 'btn8'] }}"
         sequence:
           - action: light.turn_on
             target:
